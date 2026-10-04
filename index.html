@@ -348,8 +348,23 @@
         const aiThumbnail = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'><rect width='800' height='450' fill='%230f172a'/><defs><linearGradient id='g1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%233b82f6' stop-opacity='0.2'/><stop offset='100%25' stop-color='%23fbbf24' stop-opacity='0.2'/></linearGradient></defs><rect width='800' height='450' fill='url(%23g1)'/><circle cx='400' cy='225' r='120' fill='none' stroke='%23fbbf24' stroke-width='2' stroke-dasharray='8 8' opacity='0.4'/><circle cx='400' cy='225' r='80' fill='none' stroke='%2360a5fa' stroke-width='1.5'/><text x='400' y='210' font-family='sans-serif' font-weight='900' font-size='38' fill='%23ffffff' text-anchor='middle'>AI PROMPT</text><text x='400' y='255' font-family='sans-serif' font-weight='800' font-size='26' fill='%23fbbf24' text-anchor='middle'>ENGINEERING MASTERCLASS</text><rect x='310' y='285' width='180' height='30' rx='15' fill='%231e293b' stroke='%23fbbf24' stroke-width='1'/><text x='400' y='305' font-family='sans-serif' font-weight='700' font-size='12' fill='%23f8fafc' text-anchor='middle'>TECHNICAL TUTORIAL</text></svg>";
 
         const webThumbnail = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'><rect width='800' height='450' fill='%23090d16'/><defs><linearGradient id='g2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%2310b981' stop-opacity='0.25'/><stop offset='100%25' stop-color='%233b82f6' stop-opacity='0.2'/></linearGradient></defs><rect width='800' height='450' fill='url(%23g2)'/><rect x='150' y='100' width='500' height='250' rx='16' fill='%230f172a' stroke='%23334155' stroke-width='2'/><path d='M180 140 H 620' stroke='%23334155' stroke-width='2'/><circle cx='175' cy='120' r='5' fill='%23ef4444'/><circle cx='192' cy='120' r='5' fill='%23f59e0b'/><circle cx='209' cy='120' r='5' fill='%2310b981'/><text x='400' y='210' font-family='sans-serif' font-weight='900' font-size='36' fill='%23ffffff' text-anchor='middle'>WEBSITE DEVELOPMENT</text><text x='400' y='250' font-family='sans-serif' font-weight='700' font-size='20' fill='%2338bdf8' text-anchor='middle'>HTML5 • CSS3 • JAVASCRIPT</text></svg>";
+        const freeaiThumbnail = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'><rect width='800' height='450' fill='%23090d16'/><defs><linearGradient id='g2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%2310b981' stop-opacity='0.25'/><stop offset='100%25' stop-color='%233b82f6' stop-opacity='0.2'/></linearGradient></defs><rect width='800' height='450' fill='url(%23g2)'/><rect x='150' y='100' width='500' height='250' rx='16' fill='%230f172a' stroke='%23334155' stroke-width='2'/><path d='M180 140 H 620' stroke='%23334155' stroke-width='2'/><circle cx='175' cy='120' r='5' fill='%23ef4444'/><circle cx='192' cy='120' r='5' fill='%23f59e0b'/><circle cx='209' cy='120' r='5' fill='%2310b981'/><text x='400' y='210' font-family='sans-serif' font-weight='900' font-size='36' fill='%23ffffff' text-anchor='middle'>Create And Publish Website Using Al</text><text x='400' y='250' font-family='sans-serif' font-weight='700' font-size='20' fill='%2338bdf8' text-anchor='middle'></text></svg>";
 
-        const freeCourses = [];
+        const freeCourses = [
+            {
+                id: "free-1",
+                category: "ai",
+                title: "Create And Publish Website Using Al",
+                badge: "Free",
+                thumbnail: freeaiThumbnail,
+                duration: "15:07 Minutes",
+                level: "Basic",
+                desc: "Learn to communicate effectively with Artificial Intelligence and create websites",
+                lessons: [
+                    { title: "Create And Publish Website Using Al", videoId: "https://ia601405.us.archive.org/35/items/create-and-publish-website-using-al-in-nepali-ayush-acharya-1080p/Create-and-Publish-Website-Using-Al-In-Nepali-Ayush-Acharya_1080p.mp4" }
+                ]
+            }
+        ];
 
         const paidCourses = [
             {
@@ -368,8 +383,7 @@
                 ],
                 lessons: [
                     { title: "01. Overview to AI", videoId: "https://ia601401.us.archive.org/25/items/overview-to-ai/Overview%20to%20AI.mp4" },
-                    { title: "02. Overview to AI Prompt Engineering", videoId: "https://ia601008.us.archive.org/9/items/ai-prompt-engineering-overview/AI%20PROMPT%20ENGINEERING%20OVERVIEW.mp4" },
-                  //  { title: "03. Using Different Prompt Types in ChatGPT, Claude, and Gemini", videoId: "https://player.cloudinary.com/embed/?cloud_name=vwcie5rc&public_id=Lesson_3_Using_Different_Prompt_Types_in_ChatGPT_Claude_and_Gemini_c3xmuv" }//
+                    { title: "02. Overview to AI Prompt Engineering", videoId: "https://ia601008.us.archive.org/9/items/ai-prompt-engineering-overview/AI%20PROMPT%20ENGINEERING%20OVERVIEW.mp4" }
                 ]
             }, 
             {
@@ -387,11 +401,7 @@
                 ],
                 lessons: [
                     { title: "01. Course Roadmap", videoId: "https://ia800905.us.archive.org/15/items/website-development-course-roadmap/Website%20Development%20Course%20Roadmap.mp4" },
-                    { title: "02. Introduction to Working of Web, Tools & HTML", videoId: "https://ia600109.us.archive.org/34/items/introduction-to-working-of-web-tools-html/Introduction%20to%20Working%20of%20Web%2C%20Tools%20%26%20HTML.mp4" },
-                  //  { title: "03. Modern Layouts with Flexbox & CSS Grid", videoId: "https://player.cloudinary.com/embed/?cloud_name=vwcie5rc&public_id=Comming_soon_lmf4im" },
-                   // { title: "04. Building Responsive Websites for Mobile", videoId: "https://player.cloudinary.com/embed/?cloud_name=vwcie5rc&public_id=Comming_soon_lmf4im" },
-                  //  { title: "05. JavaScript Basics & DOM Manipulation", videoId: "https://player.cloudinary.com/embed/?cloud_name=vwcie5rc&public_id=Comming_soon_lmf4im" },
-                  //  { title: "06. Building & Deploying Your First Complete Project", videoId: "https://player.cloudinary.com/embed/?cloud_name=vwcie5rc&public_id=Comming_soon_lmf4im" }
+                    { title: "02. Introduction to Working of Web, Tools & HTML", videoId: "https://ia600109.us.archive.org/34/items/introduction-to-working-of-web-tools-html/Introduction%20to%20Working%20of%20Web%2C%20Tools%20%26%20HTML.mp4" }
                 ]
             }
         ];
@@ -546,7 +556,9 @@
 
         function playFree(id) {
             const course = freeCourses.find(c => c.id === id);
-            if(course) startPlayer(course.title, [{ title: "Tutorial Overview", videoId: course.videoId }], course.desc);
+            if (course && course.lessons && course.lessons.length > 0) {
+                startPlayer(course.title, course.lessons, course.desc);
+            }
         }
 
         function initAuth(id) {
@@ -634,43 +646,5 @@
         // Initialize library on load
         renderLibrary();
     </script>
-<!-- Code injected by live-server -->
-<script>
-	// <![CDATA[  <-- For SVG support
-	if ('WebSocket' in window) {
-		(function () {
-			function refreshCSS() {
-				var sheets = [].slice.call(document.getElementsByTagName("link"));
-				var head = document.getElementsByTagName("head")[0];
-				for (var i = 0; i < sheets.length; ++i) {
-					var elem = sheets[i];
-					var parent = elem.parentElement || head;
-					parent.removeChild(elem);
-					var rel = elem.rel;
-					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
-						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
-						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
-					}
-					parent.appendChild(elem);
-				}
-			}
-			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
-			var address = protocol + window.location.host + window.location.pathname + '/ws';
-			var socket = new WebSocket(address);
-			socket.onmessage = function (msg) {
-				if (msg.data == 'reload') window.location.reload();
-				else if (msg.data == 'refreshcss') refreshCSS();
-			};
-			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
-				console.log('Live reload enabled.');
-				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
-			}
-		})();
-	}
-	else {
-		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
-	}
-	// ]]>
-</script>
 </body>
 </html>
