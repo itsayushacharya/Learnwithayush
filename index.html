@@ -249,8 +249,8 @@
                         <h3 class="text-xl font-bold text-white mb-1">Email Support</h3>
                         <p class="text-xs text-slate-400 mb-6">Inquiries, business partnerships, or enrollment assistance.</p>
                     </div>
-                    <a href="mailto:learnwithayush05@gmail.com" class="w-full bg-white/5 border border-white/10 hover:border-yellow-400/50 py-3.5 rounded-xl text-xs font-bold text-yellow-400 hover:bg-yellow-400 hover:text-black transition break-all">
-                        learnwithayush05@gmail.com
+                    <a href="/cdn-cgi/l/email-protection#d8b4bdb9aab6afb1acb0b9a1adabb0e8ed98bfb5b9b1b4f6bbb7b5" class="w-full bg-white/5 border border-white/10 hover:border-yellow-400/50 py-3.5 rounded-xl text-xs font-bold text-yellow-400 hover:bg-yellow-400 hover:text-black transition break-all">
+                        <span class="__cf_email__" data-cfemail="65090004170b120c110d041c10160d5550250208040c094b060a08">[email&#160;protected]</span>
                     </a>
                 </div>
 
@@ -292,7 +292,7 @@
                     <div class="glass-card rounded-3xl p-6 h-fit max-h-[600px] flex flex-col">
                         <div class="flex items-center justify-between mb-4 pb-4 border-b border-white/10">
                             <h3 class="text-xs font-black uppercase tracking-[0.2em] text-slate-300 flex items-center gap-2">
-                                <span class="w-2 h-2 bg-yellow-400 rounded-full animate-ping"></span> Course Modules
+                                <span class="w-2 h-2 bg-yellow-400 rounded-full animate-ping"></span> Course
                             </h3>
                             <span class="text-[10px] text-slate-500 font-mono" id="lessonCountBadge">0 Lessons</span>
                         </div>
@@ -338,12 +338,12 @@
                 <div class="w-6 h-6 bg-yellow-400/20 text-yellow-400 rounded-lg flex items-center justify-center font-bold text-xs">A</div>
                 <p>© Learn with Ayush. All rights reserved.</p>
             </div>
-            <p>Designed & Engineered by <a href="mailto:learnwithayush05@gmail.com" class="text-slate-300 font-semibold hover:text-yellow-400 transition">Ayush Acharya</a></p>
+            <p>Designed & Engineered by <a href="https://ayushacharya.info.np/" target="_blank" class="text-slate-300 font-semibold hover:text-yellow-400 transition">Ayush Acharya</a></p>
         </div>
     </footer>
 
     <!-- JavaScript Logic -->
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         // Placeholders with SVG Thumbnail Data URIs
         const aiThumbnail = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'><rect width='800' height='450' fill='%230f172a'/><defs><linearGradient id='g1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%233b82f6' stop-opacity='0.2'/><stop offset='100%25' stop-color='%23fbbf24' stop-opacity='0.2'/></linearGradient></defs><rect width='800' height='450' fill='url(%23g1)'/><circle cx='400' cy='225' r='120' fill='none' stroke='%23fbbf24' stroke-width='2' stroke-dasharray='8 8' opacity='0.4'/><circle cx='400' cy='225' r='80' fill='none' stroke='%2360a5fa' stroke-width='1.5'/><text x='400' y='210' font-family='sans-serif' font-weight='900' font-size='38' fill='%23ffffff' text-anchor='middle'>AI PROMPT</text><text x='400' y='255' font-family='sans-serif' font-weight='800' font-size='26' fill='%23fbbf24' text-anchor='middle'>ENGINEERING MASTERCLASS</text><rect x='310' y='285' width='180' height='30' rx='15' fill='%231e293b' stroke='%23fbbf24' stroke-width='1'/><text x='400' y='305' font-family='sans-serif' font-weight='700' font-size='12' fill='%23f8fafc' text-anchor='middle'>TECHNICAL TUTORIAL</text></svg>";
 
@@ -570,6 +570,11 @@
             document.getElementById('authModal').classList.add('flex');
             document.getElementById('authError').classList.add('hidden');
             document.getElementById('authCode').value = '';
+            
+            // Focus the input field when modal opens
+            setTimeout(() => {
+                document.getElementById('authCode').focus();
+            }, 100);
         }
 
         function unlockCourse() {
@@ -645,6 +650,14 @@
 
         // Initialize library on load
         renderLibrary();
+
+        // Add Enter key listener for passcode input
+        document.getElementById('authCode').addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                unlockCourse();
+            }
+        });
     </script>
 <!-- Code injected by live-server -->
 <script>
@@ -684,5 +697,6 @@
 	}
 	// ]]>
 </script>
+<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"87327fcf53be41f08c37151b64e8f4d9","r":1,"spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
