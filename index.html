@@ -90,6 +90,113 @@
             color: #000;
             font-weight: 700;
         }
+        /* Hero specific styles */
+        .hero-gradient-text {
+            background: linear-gradient(to right, #fbbf24, #f59e0b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .mask-image-gradient {
+            mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+            -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
+        }
+        /* Carousel specific */
+        .carousel-container {
+            overflow: hidden;
+            position: relative;
+        }
+        .carousel-track {
+            display: flex;
+            gap: 1.5rem;
+            transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            will-change: transform;
+            padding-bottom: 0.5rem;
+            cursor: grab;
+        }
+        .carousel-track:active {
+            cursor: grabbing;
+        }
+        .carousel-track > * {
+            flex: 0 0 auto;
+            width: calc(25% - 1.125rem);
+            min-width: 280px;
+        }
+        @media (max-width: 1024px) {
+            .carousel-track > * {
+                width: calc(33.333% - 1rem);
+            }
+        }
+        @media (max-width: 768px) {
+            .carousel-track > * {
+                width: calc(50% - 0.75rem);
+                min-width: 260px;
+            }
+        }
+        .carousel-btn {
+            transition: all 0.25s ease;
+            backdrop-filter: blur(8px);
+        }
+        .carousel-btn:hover {
+            background: rgba(251, 191, 36, 0.9);
+            color: #000;
+            border-color: #fbbf24;
+        }
+        .price-tag {
+            font-size: 1.75rem;
+            line-height: 1;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            color: #fbbf24;
+        }
+        .price-tag small {
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.02em;
+            color: #94a3b8;
+        }
+        /* Mobile: vertical list layout, no carousel */
+        @media (max-width: 640px) {
+            .carousel-btn-group {
+                display: none !important;
+            }
+            .carousel-container {
+                overflow: visible !important;
+            }
+            .carousel-track {
+                display: grid !important;
+                grid-template-columns: 1fr !important;
+                gap: 1.25rem !important;
+                transform: none !important;
+                transition: none !important;
+                cursor: default !important;
+                width: 100% !important;
+            }
+            .carousel-track > * {
+                width: 100% !important;
+                min-width: unset !important;
+                flex: none !important;
+            }
+        }
+        /* Search input styling */
+        .search-input {
+            transition: all 0.25s ease;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            color: white;
+            padding: 0.5rem 1rem 0.5rem 2.5rem;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            width: 200px;
+            outline: none;
+        }
+        .search-input:focus {
+            border-color: #fbbf24;
+            box-shadow: 0 0 0 3px rgba(251, 191, 36, 0.15);
+            width: 240px;
+        }
+        .search-input::placeholder {
+            color: #64748b;
+        }
     </style>
 </head>
 <body class="flex flex-col min-h-screen justify-between antialiased selection:bg-yellow-400/30 selection:text-yellow-200">
@@ -97,6 +204,7 @@
     <!-- Navigation -->
     <nav class="sticky top-0 z-50 glass-nav px-6 py-4">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+            <!-- Logo -->
             <div class="flex items-center justify-between w-full md:w-auto">
                 <h1 class="text-xl font-black tracking-tighter flex items-center gap-3 cursor-pointer group" onclick="showSection('dashboard')">
                     <div class="w-10 h-10 bg-gradient-to-tr from-yellow-500 to-amber-300 rounded-xl flex items-center justify-center text-slate-950 font-black text-lg rotate-3 group-hover:rotate-0 transition-all shadow-lg shadow-yellow-500/20">
@@ -109,22 +217,20 @@
                 </h1>
             </div>
 
-            <!-- Navigation Links -->
-            <div class="flex items-center gap-2 text-xs font-semibold text-slate-400 bg-slate-900/80 p-1.5 rounded-full border border-white/10">
+            <!-- Center Nav Links -->
+            <div class="hidden md:flex items-center gap-1 text-xs font-semibold text-slate-400 bg-slate-900/80 p-1.5 rounded-full border border-white/10">
                 <button onclick="showSection('dashboard')" id="nav-courses" class="px-5 py-2 rounded-full hover:text-white transition text-white bg-white/10">Courses</button>
                 <button onclick="showSection('about')" id="nav-about" class="px-5 py-2 rounded-full hover:text-white transition">About</button>
-                <button onclick="showSection('contact')" id="nav-contact" class="px-5 py-2 rounded-full hover:text-white transition">Support</button>
+                <a href="https://blog.ayushacharya.info.np/" target="_blank" class="px-5 py-2 rounded-full hover:text-white transition">Blog</a>
+                <button onclick="showSection('contact')" id="nav-contact" class="px-5 py-2 rounded-full hover:text-white transition">Contact</button>
             </div>
 
-            <!-- Search Bar -->
-            <div class="relative w-full md:w-72 group">
-                <div class="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
-                    <svg class="w-4 h-4 text-slate-500 group-focus-within:text-yellow-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
+            <!-- Right Side (Search) -->
+            <div class="flex items-center gap-3 w-full md:w-auto justify-end">
+                <div class="relative">
+                    <svg class="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+                    <input id="searchInput" type="text" placeholder="Search courses..." class="search-input" oninput="handleSearch(this.value)">
                 </div>
-                <input type="text" id="searchInput" onkeyup="searchCourses()" placeholder="Search courses or skills..." 
-                    class="w-full bg-slate-900/80 border border-white/10 rounded-full py-2 pl-10 pr-4 text-xs focus:outline-none focus:border-yellow-400/50 transition-all text-white placeholder:text-slate-500 focus:ring-2 focus:ring-yellow-400/20">
             </div>
         </div>
     </nav>
@@ -132,53 +238,106 @@
     <!-- Main Content Container -->
     <main class="mb-auto">
         <!-- Dashboard Section -->
-        <div id="dashboard" class="max-w-7xl mx-auto px-6 py-10 animate-fade">
-            <!-- Hero Header -->
-            <header class="mb-12 text-center relative pt-6">
-                <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-yellow-400/10 border border-yellow-400/20 text-yellow-400 text-xs font-bold uppercase tracking-widest mb-6">
-                    <span class="w-2 h-2 rounded-full bg-yellow-400 animate-pulse"></span> Modern Engineering & Digital Crafts
+        <div id="dashboard" class="max-w-7xl mx-auto px-6 py-8 animate-fade">
+            
+            <!-- HERO SECTION -->
+            <div class="relative rounded-[2.5rem] overflow-hidden bg-slate-900/40 border border-white/5 mb-16 flex flex-col lg:flex-row items-center shadow-2xl min-h-[500px]">
+                <!-- Background Glow -->
+                <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/80 to-transparent pointer-events-none z-0"></div>
+                <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/10 blur-[120px] rounded-full pointer-events-none"></div>
+                
+                <!-- Left Content -->
+                <div class="relative z-10 w-full lg:w-1/2 p-8 md:p-12 lg:pl-16">
+                    <!-- Badge -->
+                    <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-white/10 text-slate-300 text-xs font-bold uppercase tracking-wider mb-6 backdrop-blur-sm">
+                        <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.33 9.38a1 1 0 00-.788 0l-.588.252a1 1 0 00-.586.91V15a1 1 0 00.586.91l7 3a1 1 0 00.788 0l7-3a1 1 0 00.586-.91v-4.458a1 1 0 00-.586-.91l-.588-.252a1 1 0 00-.788 0l-6.412 2.748a1 1 0 01-.788 0L3.33 9.38z"/></svg>
+                        LEARN • GROW • BUILD
+                    </div>
+                    
+                    <!-- Heading -->
+                    <h1 class="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-6 leading-[1.1]">
+                        Master Your<br>
+                        <span class="hero-gradient-text">Digital Craft</span>
+                    </h1>
+                    
+                    <!-- Paragraph -->
+                    <p class="text-slate-400 text-sm md:text-base max-w-lg leading-relaxed mb-8">
+                        Join my international tech masterclasses and learn web development, design, video editing, and more — from beginner to pro!
+                    </p>
+                    
+                    <!-- Buttons (Watch Intro removed) -->
+                    <div class="flex flex-wrap items-center gap-4 mb-10">
+                        <button onclick="document.getElementById('courseCarouselSection').scrollIntoView({behavior: 'smooth'})" class="bg-yellow-400 text-slate-950 px-6 py-3 rounded-full font-bold text-sm hover:bg-yellow-300 transition flex items-center gap-2 shadow-lg shadow-yellow-400/20">
+                            <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
+                            Explore Courses
+                        </button>
+                    </div>
                 </div>
-                <h2 class="text-4xl md:text-6xl font-black tracking-tight mb-4 text-white leading-tight">
-                    Master Practical Skills.<br>
-                    <span class="bg-gradient-to-r from-yellow-300 via-amber-400 to-amber-500 bg-clip-text text-transparent">Build Without Limits.</span>
-                </h2>
-                <p class="text-slate-400 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
-                    Industry-ready technology masterclasses, full-stack project blueprints, and hands-on developer training designed by modern builders.
-                </p>
-            </header>
 
-            <!-- Filter Tabs -->
-            <div class="flex items-center justify-between flex-wrap gap-4 mb-8 pb-4 border-b border-white/5">
-                <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
-                    <button onclick="filterCategory('all')" class="filter-btn active px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-slate-900 border border-white/5 hover:border-yellow-400/30 transition">All Courses</button>
-                    <button onclick="filterCategory('ai')" class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-slate-900 border border-white/5 hover:border-yellow-400/30 transition">AI & ML</button>
-                    <button onclick="filterCategory('web')" class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-slate-900 border border-white/5 hover:border-yellow-400/30 transition">Web Dev</button>
-                    <button onclick="filterCategory('free')" class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-slate-900 border border-white/5 hover:border-yellow-400/30 transition">Free Tutorials</button>
-                </div>
-                <div class="text-xs text-slate-500 font-medium" id="courseCountBadge">
-                    Showing all masterclasses
+                <!-- Right Content (Image) -->
+                <div class="relative z-10 w-full lg:w-1/2 h-full min-h-[400px] lg:min-h-[600px] flex items-end justify-center lg:justify-end">
+                    <img src="https://raw.githubusercontent.com/itsayushacharya/Learnwithayush/refs/heads/main/images/profile.jpg" alt="Ayush Acharya" class="relative z-20 object-cover object-top h-full w-full max-h-[600px] lg:max-h-[700px] rounded-b-[2.5rem] lg:rounded-b-none lg:rounded-r-[2.5rem] mask-image-gradient">
+                    
+                    <!-- Signature Overlay -->
+                    <div class="absolute bottom-8 right-8 z-30 text-right">
+                        <div class="text-2xl font-signature text-white transform -rotate-6" style="font-family: 'Brush Script MT', cursive;">Ayush Acharya</div>
+                        <div class="text-[10px] font-bold text-yellow-400 uppercase tracking-widest mt-1">Founder & Instructor</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Free Courses Section -->
-            <section class="mb-14" id="freeSection">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-2.5 h-2.5 rounded-full bg-emerald-400"></div>
-                    <h3 class="text-xs font-black uppercase tracking-[0.25em] text-slate-300">Free Community Tutorials</h3>
-                    <span class="h-px flex-1 bg-white/5"></span>
+            <!-- Courses Carousel Section (Merged Free + Paid) -->
+            <div id="courseCarouselSection">
+                <div class="flex items-center justify-between mb-6">
+                    <div>
+                        <h2 class="text-2xl md:text-3xl font-extrabold text-white">Explore All <span class="text-yellow-400">Courses</span></h2>
+                        <p class="text-slate-400 text-sm mt-1">Free tutorials & premium masterclasses — swipe to browse.</p>
+                    </div>
+                    <div class="carousel-btn-group flex items-center gap-2">
+                        <button onclick="scrollCarousel(-1)" class="carousel-btn w-10 h-10 rounded-full border border-white/15 bg-slate-900/70 flex items-center justify-center text-slate-300 hover:text-black hover:bg-yellow-400 hover:border-yellow-400 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                        </button>
+                        <button onclick="scrollCarousel(1)" class="carousel-btn w-10 h-10 rounded-full border border-white/15 bg-slate-900/70 flex items-center justify-center text-slate-300 hover:text-black hover:bg-yellow-400 hover:border-yellow-400 transition">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
                 </div>
-                <div id="freeGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-            </section>
 
-            <!-- Premium Masterclasses Section -->
-            <section id="paidSection">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="w-2.5 h-2.5 rounded-full bg-yellow-400"></div>
-                    <h3 class="text-xs font-black uppercase tracking-[0.25em] text-yellow-400">Premium Pro Masterclasses</h3>
-                    <span class="h-px flex-1 bg-white/5"></span>
+                <!-- Filter Tabs -->
+                <div class="flex items-center justify-between flex-wrap gap-4 mb-6 pb-4 border-b border-white/5">
+                    <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
+                        <button onclick="filterCategory('all')" class="filter-btn active px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-slate-900 border border-white/5 hover:border-yellow-400/30 transition">All Courses</button>
+                        <button onclick="filterCategory('ai')" class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-slate-900 border border-white/5 hover:border-yellow-400/30 transition">AI & ML</button>
+                        <button onclick="filterCategory('web')" class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-slate-900 border border-white/5 hover:border-yellow-400/30 transition">Web Dev</button>
+                        <button onclick="filterCategory('free')" class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-slate-900 border border-white/5 hover:border-yellow-400/30 transition">Free Only</button>
+                        <button onclick="filterCategory('paid')" class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-slate-900 border border-white/5 hover:border-yellow-400/30 transition">Premium</button>
+                    </div>
+                    <div class="text-xs text-slate-500 font-medium" id="courseCountBadge">
+                        Showing all courses
+                    </div>
                 </div>
-                <div id="paidGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8"></div>
-            </section>
+
+                <!-- Carousel / Mobile List -->
+                <div class="carousel-container">
+                    <div id="carouselTrack" class="carousel-track"></div>
+                </div>
+
+                <!-- Enrollment info banner -->
+                <div class="mt-8 p-5 rounded-2xl bg-slate-900/60 border border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div class="flex items-center gap-3">
+                        <div class="w-9 h-9 rounded-full bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center text-yellow-400">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        </div>
+                        <p class="text-slate-400 text-xs font-medium">
+                            <span class="text-white font-bold">How to enroll:</span> Free courses play instantly. For premium courses, pay via WhatsApp and get your access code.
+                        </p>
+                    </div>
+                    <a href="https://wa.me/9779804363914?text=Hi%20Ayush%2C%20I%20want%20to%20enroll%20in%20a%20course." target="_blank" class="shrink-0 bg-[#25D366] text-slate-950 font-black py-2.5 px-5 rounded-xl text-[10px] uppercase tracking-wider hover:opacity-90 transition shadow-lg shadow-emerald-500/20 flex items-center gap-2">
+                        <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.316 1.592 5.448 0 9.886-4.438 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.818-.981z"/></svg>
+                        Pay / Enroll on WhatsApp
+                    </a>
+                </div>
+            </div>
         </div>
 
         <!-- About Section -->
@@ -188,9 +347,7 @@
                 
                 <div class="flex flex-col md:flex-row items-center gap-8 mb-10">
                     <div class="relative group">
-                        <div class="w-32 h-32 bg-gradient-to-br from-yellow-400 via-amber-500 to-yellow-600 rounded-3xl flex items-center justify-center text-slate-950 font-black text-5xl shadow-2xl shadow-yellow-500/20 shrink-0 transform -rotate-2 group-hover:rotate-0 transition-transform">
-                            AA
-                        </div>
+                        <img src="https://raw.githubusercontent.com/itsayushacharya/Learnwithayush/refs/heads/main/images/profile.jpg" alt="Ayush Acharya" class="w-32 h-32 rounded-3xl object-cover shadow-2xl shadow-yellow-500/20 shrink-0 border-2 border-yellow-400/30">
                         <div class="absolute -bottom-2 -right-2 bg-slate-950 border border-white/10 px-3 py-1 rounded-full text-[10px] font-bold text-yellow-400">
                             VERIFIED
                         </div>
@@ -249,8 +406,8 @@
                         <h3 class="text-xl font-bold text-white mb-1">Email Support</h3>
                         <p class="text-xs text-slate-400 mb-6">Inquiries, business partnerships, or enrollment assistance.</p>
                     </div>
-                    <a href="/cdn-cgi/l/email-protection#d8b4bdb9aab6afb1acb0b9a1adabb0e8ed98bfb5b9b1b4f6bbb7b5" class="w-full bg-white/5 border border-white/10 hover:border-yellow-400/50 py-3.5 rounded-xl text-xs font-bold text-yellow-400 hover:bg-yellow-400 hover:text-black transition break-all">
-                        <span class="__cf_email__" data-cfemail="65090004170b120c110d041c10160d5550250208040c094b060a08">[email&#160;protected]</span>
+                    <a href="mailto:contact@learnwithayush.com" class="w-full bg-white/5 border border-white/10 hover:border-yellow-400/50 py-3.5 rounded-xl text-xs font-bold text-yellow-400 hover:bg-yellow-400 hover:text-black transition break-all">
+                        contact@learnwithayush.com
                     </a>
                 </div>
 
@@ -343,11 +500,18 @@
     </footer>
 
     <!-- JavaScript Logic -->
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    <script>
         // Placeholders with SVG Thumbnail Data URIs
         const aiThumbnail = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'><rect width='800' height='450' fill='%230f172a'/><defs><linearGradient id='g1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%233b82f6' stop-opacity='0.2'/><stop offset='100%25' stop-color='%23fbbf24' stop-opacity='0.2'/></linearGradient></defs><rect width='800' height='450' fill='url(%23g1)'/><circle cx='400' cy='225' r='120' fill='none' stroke='%23fbbf24' stroke-width='2' stroke-dasharray='8 8' opacity='0.4'/><circle cx='400' cy='225' r='80' fill='none' stroke='%2360a5fa' stroke-width='1.5'/><text x='400' y='210' font-family='sans-serif' font-weight='900' font-size='38' fill='%23ffffff' text-anchor='middle'>AI PROMPT</text><text x='400' y='255' font-family='sans-serif' font-weight='800' font-size='26' fill='%23fbbf24' text-anchor='middle'>ENGINEERING MASTERCLASS</text><rect x='310' y='285' width='180' height='30' rx='15' fill='%231e293b' stroke='%23fbbf24' stroke-width='1'/><text x='400' y='305' font-family='sans-serif' font-weight='700' font-size='12' fill='%23f8fafc' text-anchor='middle'>TECHNICAL TUTORIAL</text></svg>";
 
         const webThumbnail = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'><rect width='800' height='450' fill='%23090d16'/><defs><linearGradient id='g2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%2310b981' stop-opacity='0.25'/><stop offset='100%25' stop-color='%233b82f6' stop-opacity='0.2'/></linearGradient></defs><rect width='800' height='450' fill='url(%23g2)'/><rect x='150' y='100' width='500' height='250' rx='16' fill='%230f172a' stroke='%23334155' stroke-width='2'/><path d='M180 140 H 620' stroke='%23334155' stroke-width='2'/><circle cx='175' cy='120' r='5' fill='%23ef4444'/><circle cx='192' cy='120' r='5' fill='%23f59e0b'/><circle cx='209' cy='120' r='5' fill='%2310b981'/><text x='400' y='210' font-family='sans-serif' font-weight='900' font-size='36' fill='%23ffffff' text-anchor='middle'>WEBSITE DEVELOPMENT</text><text x='400' y='250' font-family='sans-serif' font-weight='700' font-size='20' fill='%2338bdf8' text-anchor='middle'>HTML5 • CSS3 • JAVASCRIPT</text></svg>";
+        
+        const wpThumbnail = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'><rect width='800' height='450' fill='%230f172a'/><defs><linearGradient id='g2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%238b5cf6' stop-opacity='0.2'/><stop offset='100%25' stop-color='%23ec4899' stop-opacity='0.2'/></linearGradient></defs><rect width='800' height='450' fill='url(%23g2)'/><text x='400' y='210' font-family='sans-serif' font-weight='900' font-size='38' fill='%23ffffff' text-anchor='middle'>WORDPRESS</text><text x='400' y='255' font-family='sans-serif' font-weight='800' font-size='26' fill='%23fbbf24' text-anchor='middle'>MASTERY</text><rect x='310' y='285' width='180' height='30' rx='15' fill='%231e293b' stroke='%23fbbf24' stroke-width='1'/><text x='400' y='305' font-family='sans-serif' font-weight='700' font-size='12' fill='%23f8fafc' text-anchor='middle'>WORDPRESS</text></svg>";
+        
+        const videoThumbnail = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'><rect width='800' height='450' fill='%230f172a'/><defs><linearGradient id='g3' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%23ef4444' stop-opacity='0.2'/><stop offset='100%25' stop-color='%23f59e0b' stop-opacity='0.2'/></linearGradient></defs><rect width='800' height='450' fill='url(%23g3)'/><text x='400' y='210' font-family='sans-serif' font-weight='900' font-size='38' fill='%23ffffff' text-anchor='middle'>VIDEO EDITING</text><text x='400' y='255' font-family='sans-serif' font-weight='800' font-size='26' fill='%23fbbf24' text-anchor='middle'>WITH CAPCUT</text><rect x='310' y='285' width='180' height='30' rx='15' fill='%231e293b' stroke='%23fbbf24' stroke-width='1'/><text x='400' y='305' font-family='sans-serif' font-weight='700' font-size='12' fill='%23f8fafc' text-anchor='middle'>VIDEO EDITING</text></svg>";
+
+        const designThumbnail = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'><rect width='800' height='450' fill='%230f172a'/><defs><linearGradient id='g4' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%2310b981' stop-opacity='0.2'/><stop offset='100%25' stop-color='%233b82f6' stop-opacity='0.2'/></linearGradient></defs><rect width='800' height='450' fill='url(%23g4)'/><text x='400' y='210' font-family='sans-serif' font-weight='900' font-size='38' fill='%23ffffff' text-anchor='middle'>GRAPHIC DESIGN</text><text x='400' y='255' font-family='sans-serif' font-weight='800' font-size='26' fill='%23fbbf24' text-anchor='middle'>CANVA &amp; PHOTOSHOP</text><rect x='310' y='285' width='180' height='30' rx='15' fill='%231e293b' stroke='%23fbbf24' stroke-width='1'/><text x='400' y='305' font-family='sans-serif' font-weight='700' font-size='12' fill='%23f8fafc' text-anchor='middle'>GRAPHIC DESIGN</text></svg>";
+
         const freeaiThumbnail = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'><rect width='800' height='450' fill='%23090d16'/><defs><linearGradient id='g2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%2310b981' stop-opacity='0.25'/><stop offset='100%25' stop-color='%233b82f6' stop-opacity='0.2'/></linearGradient></defs><rect width='800' height='450' fill='url(%23g2)'/><rect x='150' y='100' width='500' height='250' rx='16' fill='%230f172a' stroke='%23334155' stroke-width='2'/><path d='M180 140 H 620' stroke='%23334155' stroke-width='2'/><circle cx='175' cy='120' r='5' fill='%23ef4444'/><circle cx='192' cy='120' r='5' fill='%23f59e0b'/><circle cx='209' cy='120' r='5' fill='%2310b981'/><text x='400' y='210' font-family='sans-serif' font-weight='900' font-size='36' fill='%23ffffff' text-anchor='middle'>Create And Publish</text><text x='400' y='250' font-family='sans-serif' font-weight='700' font-size='20' fill='%2338bdf8' text-anchor='middle'> Using Al Website</text></svg>";
 
         const freeCourses = [
@@ -406,121 +570,172 @@
             }
         ];
 
+        // Combine all courses into one array with a type flag
+        const allCourses = [
+            ...freeCourses.map(c => ({ ...c, type: 'free' })),
+            ...paidCourses.map(c => ({ ...c, type: 'paid' }))
+        ];
+
         let activeCourse = null;
         let currentCategoryFilter = 'all';
+        let currentCarouselIndex = 0;
+        let visibleCarouselItems = 0;
+        let currentSearchQuery = '';
 
-        function renderLibrary(filter = "") {
-            const fGrid = document.getElementById('freeGrid');
-            const pGrid = document.getElementById('paidGrid');
-            const fSection = document.getElementById('freeSection');
+        // Carousel rendering with search
+        function renderCarousel() {
+            const track = document.getElementById('carouselTrack');
             const badge = document.getElementById('courseCountBadge');
             
-            fGrid.innerHTML = ""; 
-            pGrid.innerHTML = "";
+            track.innerHTML = "";
 
-            const filteredFree = freeCourses.filter(c => {
-                const matchesSearch = c.title.toLowerCase().includes(filter.toLowerCase()) || c.desc.toLowerCase().includes(filter.toLowerCase());
-                const matchesCategory = currentCategoryFilter === 'all' || currentCategoryFilter === 'free' || c.category === currentCategoryFilter;
+            // Filter courses by search AND category
+            const filtered = allCourses.filter(c => {
+                const searchLower = currentSearchQuery.toLowerCase().trim();
+                const matchesSearch = searchLower === '' || 
+                    c.title.toLowerCase().includes(searchLower) || 
+                    c.desc.toLowerCase().includes(searchLower) ||
+                    c.category.toLowerCase().includes(searchLower);
+                
+                let matchesCategory = false;
+                if (currentCategoryFilter === 'all') matchesCategory = true;
+                else if (currentCategoryFilter === 'free') matchesCategory = c.type === 'free';
+                else if (currentCategoryFilter === 'paid') matchesCategory = c.type === 'paid';
+                else matchesCategory = c.category === currentCategoryFilter;
+                
                 return matchesSearch && matchesCategory;
             });
 
-            const filteredPaid = paidCourses.filter(c => {
-                const matchesSearch = c.title.toLowerCase().includes(filter.toLowerCase()) || c.desc.toLowerCase().includes(filter.toLowerCase());
-                const matchesCategory = currentCategoryFilter === 'all' || c.category === currentCategoryFilter;
-                return matchesSearch && matchesCategory;
-            });
+            badge.innerText = `Showing ${filtered.length} course${filtered.length === 1 ? '' : 's'}`;
 
-            const totalShown = filteredFree.length + filteredPaid.length;
-            badge.innerText = `Showing ${totalShown} course${totalShown === 1 ? '' : 's'}`;
-
-            if (filteredFree.length === 0) {
-                fSection.classList.add('hidden');
-            } else {
-                fSection.classList.remove('hidden');
-                filteredFree.forEach(c => {
-                    fGrid.innerHTML += `
-                        <div class="course-card rounded-3xl overflow-hidden flex flex-col justify-between">
-                            <div>
-                                <div class="relative overflow-hidden aspect-video bg-slate-900">
-                                    <img src="${c.thumbnail}" alt="${c.title}" class="thumb-img w-full h-full object-cover transition-transform duration-500">
-                                    <div class="absolute top-3 left-3 bg-emerald-500 text-slate-950 font-black text-[9px] px-2.5 py-1 rounded-full uppercase tracking-wider">
-                                        FREE
-                                    </div>
-                                </div>
-                                <div class="p-6">
-                                    <h3 class="text-lg font-bold text-white mb-2 line-clamp-1">${c.title}</h3>
-                                    <p class="text-slate-400 text-xs leading-relaxed line-clamp-2">${c.desc}</p>
-                                </div>
-                            </div>
-                            <div class="p-6 pt-0">
-                                <button onclick="playFree('${c.id}')" class="w-full bg-white/5 border border-white/10 py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-white hover:bg-white/10 transition">Start Free Watch</button>
-                            </div>
-                        </div>`;
-                });
-            }
-
-            if (filteredPaid.length === 0 && filteredFree.length === 0) {
-                pGrid.innerHTML = `
-                    <div class="col-span-full py-16 text-center text-slate-500">
+            if (filtered.length === 0) {
+                track.innerHTML = `
+                    <div class="w-full py-16 text-center text-slate-500">
                         <svg class="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        <p class="text-sm font-semibold">No masterclasses match your search criteria.</p>
+                        <p class="text-sm font-semibold">No courses match your search criteria.</p>
                         <button onclick="clearSearch()" class="mt-4 text-xs text-yellow-400 font-bold hover:underline">Clear Search Filter</button>
                     </div>`;
-            } else {
-                filteredPaid.forEach(c => {
-                    pGrid.innerHTML += `
-                        <div class="course-card rounded-3xl overflow-hidden flex flex-col justify-between">
-                            <div>
-                                <div class="relative overflow-hidden aspect-video bg-slate-900">
-                                    <img src="${c.thumbnail}" alt="${c.title}" class="thumb-img w-full h-full object-cover transition-transform duration-500">
-                                    <div class="absolute top-3 left-3 bg-yellow-400 text-slate-950 font-black text-[9px] px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg">
-                                        ${c.badge || 'PREMIUM'}
-                                    </div>
-                                    <div class="absolute bottom-3 right-3 bg-slate-950/80 backdrop-blur-md text-slate-300 font-mono text-[10px] px-2.5 py-1 rounded-full border border-white/10">
-                                        ${c.duration}
-                                    </div>
-                                </div>
-                                <div class="p-6">
-                                    <div class="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2">
-                                        <span class="text-yellow-400">${c.lessons.length} Modules</span> • <span>${c.level}</span>
-                                    </div>
-                                    <h3 class="text-lg font-extrabold text-white mb-2 leading-snug">${c.title}</h3>
-                                    <p class="text-slate-400 text-xs leading-relaxed line-clamp-2">${c.desc}</p>
-                                </div>
-                            </div>
-                            <div class="p-6 pt-0 border-t border-white/5 mt-4">
-                                <div class="flex items-center justify-between my-4">
-                                    <div>
-                                        <div class="text-[10px] text-slate-500 font-bold uppercase tracking-wider"> Fee</div>
-                                        <div class="text-2xl font-black text-white tracking-tight">Rs. ${c.price}</div>
-                                    </div>
-                                    <div class="text-right">
-                                        <span class="text-[10px] text-emerald-400 font-bold bg-emerald-500/10 px-2 py-1 rounded border border-emerald-500/20">Instant Access</span>
-                                    </div>
-                                </div>
-                                <button onclick="initAuth('${c.id}')" class="w-full bg-gradient-to-r from-yellow-400 to-amber-500 text-slate-950 py-3.5 rounded-xl text-xs font-black uppercase tracking-wider hover:brightness-110 transition shadow-lg shadow-yellow-500/20">
-                                    Enroll & Unlock Course
-                                </button>
-                            </div>
-                        </div>`;
-                });
+                return;
             }
+
+            filtered.forEach(c => {
+                const isFree = c.type === 'free';
+                const card = document.createElement('div');
+                card.className = "course-card rounded-3xl overflow-hidden flex flex-col justify-between";
+                
+                // Build price / badge section
+                let priceHtml = '';
+                if (isFree) {
+                    priceHtml = `<div class="flex items-center gap-2"><span class="text-2xl font-black text-emerald-400">FREE</span><span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Instant Access</span></div>`;
+                } else {
+                    priceHtml = `<div class="flex items-baseline gap-2"><span class="price-tag">Rs. ${c.price}</span><small class="text-slate-400 font-medium">one-time</small></div>`;
+                }
+
+                // Badge
+                const badgeLabel = isFree ? 'FREE' : (c.badge || 'PREMIUM');
+                const badgeClass = isFree ? 'bg-emerald-500 text-slate-950' : 'bg-yellow-400 text-slate-950';
+
+                // Action button
+                const actionBtn = isFree
+                    ? `<button onclick="playFree('${c.id}')" class="w-full bg-white/5 border border-white/10 py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-white hover:bg-white/10 transition">Start Free Watch</button>`
+                    : `<button onclick="initAuth('${c.id}')" class="w-full bg-yellow-400 text-slate-950 py-3 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-yellow-300 transition shadow-lg shadow-yellow-400/20 flex items-center justify-between px-4">
+                        <span>Enroll Now</span>
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                       </button>`;
+
+                card.innerHTML = `
+                    <div>
+                        <div class="relative overflow-hidden aspect-video bg-slate-900">
+                            <img src="${c.thumbnail}" alt="${c.title}" class="thumb-img w-full h-full object-cover transition-transform duration-500">
+                            <div class="absolute top-3 left-3 ${badgeClass} font-black text-[9px] px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg">
+                                ${badgeLabel}
+                            </div>
+                            <div class="absolute bottom-3 right-3 bg-slate-950/80 backdrop-blur-md text-slate-300 font-mono text-[10px] px-2.5 py-1 rounded-full border border-white/10">
+                                ${c.duration}
+                            </div>
+                        </div>
+                        <div class="p-5 pb-3">
+                            <h3 class="text-base font-extrabold text-white mb-1.5 leading-snug line-clamp-2">${c.title}</h3>
+                            <p class="text-slate-400 text-[11px] leading-relaxed line-clamp-2 mb-3">${c.desc}</p>
+                            <div class="flex items-center justify-between pt-3 border-t border-white/5">
+                                ${priceHtml}
+                                <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">${c.level || ''}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-5 pt-0">
+                        ${actionBtn}
+                    </div>
+                `;
+                track.appendChild(card);
+            });
+
+            // Reset carousel position
+            currentCarouselIndex = 0;
+            updateCarousel();
+        }
+
+        function updateCarousel() {
+            // On mobile (<=640px) the grid layout handles it natively
+            if (window.matchMedia('(max-width: 640px)').matches) {
+                return;
+            }
+            
+            const track = document.getElementById('carouselTrack');
+            const cards = track.children;
+            if (cards.length === 0) return;
+            
+            // Calculate how many items are visible based on screen width
+            const containerWidth = track.parentElement.clientWidth;
+            const cardWidth = cards[0].offsetWidth + 24; // 24px gap (1.5rem)
+            visibleCarouselItems = Math.max(1, Math.floor(containerWidth / cardWidth));
+            
+            // Clamp index
+            const maxIndex = Math.max(0, cards.length - visibleCarouselItems);
+            if (currentCarouselIndex > maxIndex) currentCarouselIndex = maxIndex;
+            
+            const offset = -currentCarouselIndex * cardWidth;
+            track.style.transform = `translateX(${offset}px)`;
+        }
+
+        function scrollCarousel(direction) {
+            if (window.matchMedia('(max-width: 640px)').matches) {
+                return; // On mobile, native scrolling handles it
+            }
+            
+            const track = document.getElementById('carouselTrack');
+            const cards = track.children;
+            if (cards.length === 0) return;
+            
+            const containerWidth = track.parentElement.clientWidth;
+            const cardWidth = cards[0].offsetWidth + 24;
+            const visibleCount = Math.max(1, Math.floor(containerWidth / cardWidth));
+            const maxIndex = Math.max(0, cards.length - visibleCount);
+            
+            currentCarouselIndex = Math.min(maxIndex, Math.max(0, currentCarouselIndex + direction));
+            updateCarousel();
         }
 
         function filterCategory(cat) {
             currentCategoryFilter = cat;
             document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
             event.target.classList.add('active');
-            renderLibrary(document.getElementById('searchInput').value);
+            renderCarousel();
+        }
+
+        // Search functionality
+        function handleSearch(query) {
+            currentSearchQuery = query;
+            renderCarousel();
         }
 
         function clearSearch() {
-            document.getElementById('searchInput').value = '';
-            renderLibrary();
-        }
-
-        function searchCourses() {
-            renderLibrary(document.getElementById('searchInput').value);
+            const searchInput = document.getElementById('searchInput');
+            if (searchInput) {
+                searchInput.value = '';
+            }
+            currentSearchQuery = '';
+            renderCarousel();
         }
 
         function showSection(sectionId) {
@@ -571,7 +786,6 @@
             document.getElementById('authError').classList.add('hidden');
             document.getElementById('authCode').value = '';
             
-            // Focus the input field when modal opens
             setTimeout(() => {
                 document.getElementById('authCode').focus();
             }, 100);
@@ -586,7 +800,6 @@
                 return;
             }
 
-            // Verify passcode against course's passcodes array
             const isValid = activeCourse.passcodes.some(item => {
                 if (typeof item === 'string') {
                     return item === val;
@@ -648,8 +861,15 @@
             document.getElementById('authModal').classList.remove('flex');
         }
 
-        // Initialize library on load
-        renderLibrary();
+        // Initialize on load
+        window.addEventListener('load', () => {
+            renderCarousel();
+            updateCarousel();
+        });
+
+        window.addEventListener('resize', () => {
+            updateCarousel();
+        });
 
         // Add Enter key listener for passcode input
         document.getElementById('authCode').addEventListener('keydown', function(event) {
@@ -659,44 +879,5 @@
             }
         });
     </script>
-<!-- Code injected by live-server -->
-<script>
-	// <![CDATA[  <-- For SVG support
-	if ('WebSocket' in window) {
-		(function () {
-			function refreshCSS() {
-				var sheets = [].slice.call(document.getElementsByTagName("link"));
-				var head = document.getElementsByTagName("head")[0];
-				for (var i = 0; i < sheets.length; ++i) {
-					var elem = sheets[i];
-					var parent = elem.parentElement || head;
-					parent.removeChild(elem);
-					var rel = elem.rel;
-					if (elem.href && typeof rel != "string" || rel.length == 0 || rel.toLowerCase() == "stylesheet") {
-						var url = elem.href.replace(/(&|\?)_cacheOverride=\d+/, '');
-						elem.href = url + (url.indexOf('?') >= 0 ? '&' : '?') + '_cacheOverride=' + (new Date().valueOf());
-					}
-					parent.appendChild(elem);
-				}
-			}
-			var protocol = window.location.protocol === 'http:' ? 'ws://' : 'wss://';
-			var address = protocol + window.location.host + window.location.pathname + '/ws';
-			var socket = new WebSocket(address);
-			socket.onmessage = function (msg) {
-				if (msg.data == 'reload') window.location.reload();
-				else if (msg.data == 'refreshcss') refreshCSS();
-			};
-			if (sessionStorage && !sessionStorage.getItem('IsThisFirstTime_Log_From_LiveServer')) {
-				console.log('Live reload enabled.');
-				sessionStorage.setItem('IsThisFirstTime_Log_From_LiveServer', true);
-			}
-		})();
-	}
-	else {
-		console.error('Upgrade your browser. This Browser is NOT supported WebSocket for Live-Reloading.');
-	}
-	// ]]>
-</script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/v31edd6df95cf4e85bb4c19e7a9bdbcba1788362987495" integrity="sha512-iIg7k2xntmwu6/uSb5tpc/hySgZc4eoL31yB29W6tJFo2akwjPWcEqnCEdJvGexCL0KEQwVYv5BlowfhVz26hg==" data-cf-beacon='{"version":"2024.11.0","token":"87327fcf53be41f08c37151b64e8f4d9","r":1,"spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
