@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Download Learn with Ayush</title>
+  <!-- Favicon from the specified URL -->
+  <link rel="icon" type="image/png" href="https://raw.githubusercontent.com/itsayushacharya/Learnwithayush/refs/heads/main/images/icon.png">
+  <!-- Google Fonts for clean typography -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700&display=swap" rel="stylesheet">
+  <!-- Font Awesome for icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: linear-gradient(145deg, #f0f4ff 0%, #e6ecfe 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+      color: #1e293b;
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 2.5rem;
+      box-shadow: 0 30px 50px -15px rgba(0, 20, 60, 0.25), 
+                  inset 0 1px 2px rgba(255, 255, 255, 0.7);
+      max-width: 680px;
+      width: 100%;
+      padding: 2.5rem 2rem;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      transition: transform 0.2s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 35px 55px -15px rgba(0, 20, 60, 0.3), 
+                  inset 0 1px 2px rgba(255, 255, 255, 0.8);
+    }
+
+    .app-header {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .app-icon {
+      width: 90px;
+      height: 90px;
+      border-radius: 22px;
+      object-fit: cover;
+      box-shadow: 0 12px 18px -6px rgba(0, 0, 0, 0.15), 
+                  0 0 0 2px rgba(255, 255, 255, 0.8);
+      transition: transform 0.3s;
+      background-color: #fff;
+      flex-shrink: 0;
+    }
+
+    .app-icon:hover {
+      transform: scale(1.02);
+    }
+
+    .app-info h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      color: #0f172a;
+      line-height: 1.2;
+      margin-bottom: 0.4rem;
+    }
+
+    .app-info .tagline {
+      font-size: 1rem;
+      color: #475569;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .tagline i {
+      color: #3b82f6;
+      font-size: 0.9rem;
+    }
+
+    /* New tagline style */
+    .new-tagline {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin: 0.5rem 0 1rem 0;
+      background: linear-gradient(90deg, #3b82f6 0%, #1e40af 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: -0.01em;
+      flex-wrap: wrap;
+    }
+
+    .new-tagline i {
+      color: #3b82f6;
+      font-size: 1rem;
+      background: none;
+      -webkit-text-fill-color: #3b82f6;
+    }
+
+    .meta-badge {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin: 1.5rem 0 2rem 0;
+    }
+
+    .badge {
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(4px);
+      padding: 0.5rem 1.2rem;
+      border-radius: 40px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #1e293b;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+      border: 1px solid rgba(255, 255, 255, 0.9);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .badge i {
+      color: #3b82f6;
+      font-size: 0.95rem;
+    }
+
+    .version-badge {
+      background: #3b82f6;
+      color: white;
+      border: none;
+      box-shadow: 0 8px 16px -6px #3b82f680;
+    }
+
+    .version-badge i {
+      color: white;
+    }
+
+    .download-section {
+      margin: 2rem 0 1.5rem;
+    }
+
+    .download-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      background: linear-gradient(120deg, #2563eb, #1e40af);
+      color: white;
+      font-weight: 700;
+      font-size: 1.4rem;
+      padding: 1.2rem 1.8rem;
+      border-radius: 60px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      box-shadow: 0 20px 30px -10px #1e3a8a99, 0 0 0 1px rgba(255, 255, 255, 0.2) inset;
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      letter-spacing: -0.01em;
+      width: 100%;
+    }
+
+    .download-btn i {
+      font-size: 1.7rem;
+      transition: transform 0.2s;
+    }
+
+    .download-btn:hover {
+      background: linear-gradient(120deg, #1e4fcf, #152e7a);
+      transform: scale(1.02);
+      box-shadow: 0 24px 36px -10px #1e3a8acc;
+    }
+
+    .download-btn:hover i {
+      transform: translateY(-2px);
+    }
+
+    .download-btn:active {
+      transform: scale(0.99);
+      box-shadow: 0 12px 20px -8px #1e3a8a;
+    }
+
+    .file-details {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1.8rem;
+      margin-top: 1rem;
+      font-size: 0.9rem;
+      color: #475569;
+      font-weight: 500;
+      flex-wrap: wrap;
+    }
+
+    .file-details span {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      background: rgba(255, 255, 255, 0.55);
+      padding: 0.4rem 1rem;
+      border-radius: 30px;
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+    }
+
+    .file-details i {
+      color: #3b82f6;
+      font-size: 0.9rem;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, #cbd5e1, transparent);
+      margin: 1.5rem 0 1rem;
+    }
+
+    .footer-note {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-size: 0.85rem;
+      color: #64748b;
+      text-align: center;
+      margin-top: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .footer-note i {
+      color: #3b82f6;
+      font-size: 0.9rem;
+    }
+
+    .security-note {
+      background: rgba(59, 130, 246, 0.08);
+      border-radius: 50px;
+      padding: 0.75rem 1.5rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.9rem;
+      font-weight: 500;
+      color: #1e40af;
+      margin-bottom: 0.5rem;
+      border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+
+    /* Responsive */
+    @media (max-width: 520px) {
+      .card {
+        padding: 1.8rem 1.2rem;
+        border-radius: 2rem;
+      }
+
+      .app-header {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+        margin-bottom: 1rem;
+      }
+
+      .app-icon {
+        width: 80px;
+        height: 80px;
+      }
+
+      .app-info h1 {
+        font-size: 1.8rem;
+      }
+
+      .app-info .tagline {
+        justify-content: center;
+      }
+
+      .new-tagline {
+        justify-content: center;
+        font-size: 1rem;
+      }
+
+      .download-btn {
+        font-size: 1.2rem;
+        padding: 1rem 1.2rem;
+      }
+
+      .meta-badge {
+        justify-content: center;
+      }
+
+      .file-details {
+        gap: 0.8rem;
+      }
+
+      .file-details span {
+        font-size: 0.8rem;
+        padding: 0.3rem 0.8rem;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .app-info h1 {
+        font-size: 1.5rem;
+      }
+      .badge {
+        font-size: 0.75rem;
+        padding: 0.4rem 1rem;
+      }
+      .download-btn i {
+        font-size: 1.4rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <!-- App header with icon and title -->
+    <div class="app-header">
+      <img 
+        src="https://raw.githubusercontent.com/itsayushacharya/Learnwithayush/refs/heads/main/images/icon.png" 
+        alt="Learn with Ayush app icon" 
+        class="app-icon"
+        loading="lazy"
+      >
+      <div class="app-info">
+        <h1>Learn with Ayush</h1>
+        <!-- Original tagline (kept) -->
+        <div class="tagline">
+          <i class="fas fa-graduation-cap"></i>
+          <span>Learn anytime, anywhere</span>
+        </div>
+        <!-- NEW TAGLINE: Master Your Digital Craft, tech courses -->
+        <div class="new-tagline">
+          <i class="fas fa-code"></i>
+          <span>Master Your Digital Craft, tech courses</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Meta badges (version, size, platform) -->
+    <div class="meta-badge">
+      <div class="badge version-badge">
+        <i class="fas fa-tag"></i> v1.0.0
+      </div>
+      <div class="badge">
+        <i class="fas fa-mobile-alt"></i> Android
+      </div>
+      <div class="badge">
+        <i class="fas fa-hdd"></i> 8.7 MB
+      </div>
+      <div class="badge">
+        <i class="fas fa-star"></i> Tech Courses
+      </div>
+    </div>
+
+    <!-- Download section -->
+    <div class="download-section">
+      <a 
+        href="https://github.com/itsayushacharya/Learnwithayush/raw/refs/heads/main/app/learn%20with%20ayush.apk" 
+        class="download-btn"
+        target="_blank"
+        rel="noopener noreferrer"
+        download
+      >
+        <i class="fas fa-download"></i>
+        <span>Download APK</span>
+      </a>
+    </div>
+
+    <!-- File details -->
+    <div class="file-details">
+      <span>
+      <span>
+        <i class="fas fa-shield-alt"></i> Safe & secure
+      </span>
+      <span>
+        <i class="fas fa-check-circle"></i> Virus-free
+      </span>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- Security note -->
+    <div style="display: flex; justify-content: center; margin-bottom: 1rem;">
+      <div class="security-note">
+      </div>
+    </div>
+
+    </div>
+  </div>
+</body>
+</html>
