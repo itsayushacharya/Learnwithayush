@@ -956,15 +956,15 @@
             renderCarousel();
             updateCarousel();
 
-            // Auto-open app popup IMMEDIATELY, and auto-close it exactly 1 second later
+            // Auto-open app popup IMMEDIATELY, and auto-close it exactly 2 seconds later
             if (!sessionStorage.getItem('appPopupShown')) {
                 openAppPopup(); // Open immediately
                 sessionStorage.setItem('appPopupShown', 'true');
                 
-                // Close exactly 1000ms (1 second) later
+                // Close exactly 2000ms (2 seconds) later
                 setTimeout(() => {
                     closeAppPopup();
-                }, 1000); 
+                }, 2000); 
             }
         });
 
