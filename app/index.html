@@ -825,14 +825,16 @@
   function switchVideo(id) {
     const w = document.getElementById('mediaWrapper');
     if (!id) { w.innerHTML = ''; return; }
+    
+    // Added fullscreen allowing attributes to video and iframe
     if (id.startsWith('http') && (id.includes('.mp4') || id.includes('.webm'))) {
-      w.innerHTML = `<video src="${id}" controls autoplay playsinline class="rounded-2xl"></video>`;
+      w.innerHTML = `<video src="${id}" controls autoplay playsinline webkitallowfullscreen mozallowfullscreen allowfullscreen class="rounded-2xl"></video>`;
     } else if (id.includes('youtube')) {
-      w.innerHTML = `<iframe src="${id}" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+      w.innerHTML = `<iframe src="${id}" allow="fullscreen; autoplay; encrypted-media; picture-in-picture" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>`;
     } else if (id.startsWith('http')) {
-      w.innerHTML = `<iframe src="${id}" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+      w.innerHTML = `<iframe src="${id}" allow="fullscreen; autoplay; encrypted-media; picture-in-picture" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>`;
     } else {
-      w.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+      w.innerHTML = `<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0" allow="fullscreen; autoplay; encrypted-media; picture-in-picture" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>`;
     }
   }
 
@@ -876,6 +878,39 @@
       document.getElementById('authError').classList.remove('hidden');
     }
   }
+
+  // ============ SWIPE BACK GESTURE ============
+  let touchStartX = 0;
+  let touchStartY = 0;
+  
+  const playerScreen = document.getElementById('playerScreen');
+  
+  playerScreen.addEventListener('touchstart', (e) => {
+    // Only track if player is visible
+    if (playerScreen.classList.contains('hidden')) return;
+    
+    touchStartX = e.changedTouches[0].screenX;
+    touchStartY = e.changedTouches[0].screenY;
+  }, { passive: true });
+
+  playerScreen.addEventListener('touchend', (e) => {
+    // Only track if player is visible
+    if (playerScreen.classList.contains('hidden')) return;
+    
+    const touchEndX = e.changedTouches[0].screenX;
+    const touchEndY = e.changedTouches[0].screenY;
+    
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+
+    // If swipe is mostly horizontal, moves right, and is long enough
+    if (Math.abs(deltaX) > Math.abs(deltaY) && deltaX > 80) {
+      // Ignore if the user was scrolling
+      if (playerScreen.scrollTop > 0 && Math.abs(deltaY) > 30) return;
+
+      closePlayer();
+    }
+  }, { passive: true });
 
   // ============ INIT ============
   document.addEventListener('DOMContentLoaded', () => {
