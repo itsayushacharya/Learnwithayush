@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0F1115">
+<title>Learn with Ayush</title>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&family=Roboto+Flex:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0F1115;--s1:#171A21;--s2:#1E222B;--s3:#262B36;
+  --pri:#FFC947;--on-pri:#3F2E00;--pri-c:#5B4300;--on-pri-c:#FFDEA0;
+  --txt:#E4E2E6;--txt2:#B0B4BF;--out:#8C919D;--outv:#3A3F4A;
+  --ok:#6FDD8B;--err:#FFB4AB;
+  --top:env(safe-area-inset-top,0px);--bot:env(safe-area-inset-bottom,0px);
+  --ease:cubic-bezier(.2,0,0,1);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overscroll-behavior:none;background:var(--bg)}
+body{font-family:Roboto,system-ui,sans-serif;color:var(--txt);font-size:14px;line-height:1.45;-webkit-font-smoothing:antialiased;user-select:none;-webkit-user-select:none}
+input{user-select:text;-webkit-user-select:text;font-family:inherit}
+button{font-family:inherit;border:0;background:none;color:inherit;cursor:pointer}
+a{color:inherit;text-decoration:none}
+svg{width:24px;height:24px;fill:currentColor;flex-shrink:0}
+.clamp2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.clamp1{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* state layer (ripple-like press feedback) */
+.press{position:relative;overflow:hidden;transition:transform .15s var(--ease)}
+.press::after{content:"";position:absolute;inset:0;background:currentColor;opacity:0;transition:opacity .15s;pointer-events:none;border-radius:inherit}
+.press:active::after{opacity:.12}
+
+/* splash */
+#splash{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .4s var(--ease)}
+#splash.off{opacity:0;pointer-events:none}
+#splash img{width:96px;height:96px;border-radius:28px;object-fit:cover;animation:pop .8s var(--ease)}
+#splash b{margin-top:20px;font:700 20px 'Roboto Flex',Roboto;letter-spacing:.04em;color:var(--pri)}
+#splash small{margin-top:4px;color:var(--out);font-size:12px;letter-spacing:.2em;text-transform:uppercase}
+#splash i{margin-top:36px;width:120px;height:4px;border-radius:2px;background:var(--s3);overflow:hidden;position:relative}
+#splash i::after{content:"";position:absolute;inset:0;width:40%;background:var(--pri);border-radius:2px;animation:bar 1.1s infinite var(--ease)}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes bar{from{transform:translateX(-100%)}to{transform:translateX(300%)}}
+
+/* top app bar */
+.appbar{position:sticky;top:0;z-index:30;background:var(--bg);padding:calc(var(--top) + 8px) 16px 8px;display:flex;align-items:center;gap:12px;min-height:calc(var(--top) + 64px);transition:background .2s}
+.appbar.scrolled{background:var(--s2)}
+.appbar img{width:36px;height:36px;border-radius:10px;object-fit:cover}
+.appbar h1{font:500 22px 'Roboto Flex',Roboto;flex:1}
+
+/* pages */
+main{padding-bottom:calc(88px + var(--bot))}
+.page{display:none;padding:0 16px;animation:in .3s var(--ease)}
+.page.on{display:block}
+@keyframes in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.h{font:500 20px 'Roboto Flex',Roboto;margin:24px 0 12px;display:flex;justify-content:space-between;align-items:center}
+.h button{font:500 14px Roboto;color:var(--pri);padding:6px 10px;border-radius:20px;margin:-6px -10px}
+.sub{color:var(--txt2);font-size:14px}
+
+/* search bar (M3) */
+.search{display:flex;align-items:center;gap:12px;height:52px;padding:0 16px;border-radius:28px;background:var(--s3);margin-top:4px}
+.search svg{color:var(--txt2)}
+.search input{flex:1;background:none;border:0;outline:0;color:var(--txt);font-size:16px;min-width:0}
+.search input::placeholder{color:var(--txt2)}
+
+/* hero */
+.hero{margin-top:16px;padding:24px;border-radius:28px;background:linear-gradient(135deg,var(--pri-c,#5B4300),#2A2330);position:relative;overflow:hidden}
+.hero h2{font:700 30px/1.15 'Roboto Flex',Roboto;margin:12px 0 8px}
+.hero h2 em{font-style:normal;color:var(--pri)}
+.hero p{color:var(--on-pri-c);opacity:.85;margin-bottom:18px;max-width:320px}
+.tag{display:inline-flex;align-items:center;height:28px;padding:0 12px;border-radius:8px;background:rgba(0,0,0,.3);font-size:12px;font-weight:500;color:var(--on-pri-c)}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;height:40px;padding:0 24px;border-radius:20px;font:500 14px Roboto;letter-spacing:.01em}
+.btn.fill{background:var(--pri);color:var(--on-pri)}
+.btn.tonal{background:var(--pri-c);color:var(--on-pri-c)}
+.btn.out{border:1px solid var(--out);color:var(--pri)}
+.btn.wa{background:#25D366;color:#06220f}
+.btn.full{width:100%;height:48px;border-radius:24px}
+.btn svg{width:18px;height:18px}
+
+/* chips */
+.chips{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;margin:0 -16px;padding:0 16px}
+.chips::-webkit-scrollbar{display:none}
+.chip{height:32px;padding:0 16px;border-radius:8px;border:1px solid var(--outv);color:var(--txt);font:500 14px Roboto;white-space:nowrap;display:flex;align-items:center;gap:6px;transition:all .2s}
+.chip.on{background:var(--pri-c);color:var(--on-pri-c);border-color:transparent}
+
+/* cards */
+.card{background:var(--s1);border-radius:20px;overflow:hidden;border:1px solid var(--outv)}
+.grid{display:grid;gap:16px}
+@media(min-width:640px){.grid{grid-template-columns:1fr 1fr}}
+.thumb{position:relative;aspect-ratio:16/9;background:var(--s2)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.badge{position:absolute;top:12px;left:12px;height:24px;padding:0 10px;border-radius:8px;font:700 11px/24px Roboto;letter-spacing:.06em;text-transform:uppercase}
+.badge.free{background:var(--ok);color:#00391a}
+.badge.paid{background:var(--pri);color:var(--on-pri)}
+.dur{position:absolute;bottom:12px;right:12px;height:24px;padding:0 8px;border-radius:8px;background:rgba(0,0,0,.65);font-size:12px;line-height:24px}
+.body{padding:16px}
+.body h3{font:500 16px/1.3 'Roboto Flex',Roboto;margin-bottom:4px}
+.body p{color:var(--txt2);font-size:13px;margin-bottom:12px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.price{font:700 20px 'Roboto Flex',Roboto}
+.price.free{color:var(--ok)}.price.paid{color:var(--pri)}
+.lvl{font-size:12px;color:var(--out)}
+
+/* list tiles */
+.tile{display:flex;align-items:center;gap:16px;padding:12px 16px;border-radius:16px;background:var(--s1);border:1px solid var(--outv);margin-bottom:8px;min-height:72px}
+.ic{width:44px;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:var(--pri-c);color:var(--on-pri-c);flex-shrink:0;font-weight:700}
+.tile .t{flex:1;min-width:0}
+.tile .t b{font-weight:500;font-size:16px;display:block}
+.tile .t span{color:var(--txt2);font-size:13px}
+.tile>svg:last-child{color:var(--out)}
+
+.prog{height:4px;border-radius:2px;background:var(--s3);overflow:hidden;margin:8px 0 4px}
+.prog div{height:100%;background:var(--pri);border-radius:2px;transition:width .4s var(--ease)}
+.lcard{display:flex;gap:12px;padding:12px;margin-bottom:12px}
+.lcard .th{width:112px;height:76px;border-radius:12px;overflow:hidden;flex-shrink:0;background:var(--s2)}
+.lcard .th img{width:100%;height:100%;object-fit:cover}
+.lcard .in{flex:1;min-width:0}
+.lcard .in b{font:500 14px/1.3 Roboto;display:block;margin-bottom:2px}
+.lcard small{color:var(--txt2);font-size:12px}
+.link{color:var(--txt2);font:500 12px Roboto;padding:6px 8px;margin:-6px -8px;border-radius:12px}
+.empty{text-align:center;padding:56px 24px;color:var(--txt2)}
+.empty .ic{width:72px;height:72px;border-radius:24px;background:var(--s2);color:var(--out);margin:0 auto 16px}
+.empty .ic svg{width:36px;height:36px}
+.empty b{display:block;color:var(--txt);font:500 18px 'Roboto Flex',Roboto;margin-bottom:4px}
+.empty .btn{margin-top:20px}
+
+/* about */
+.prof{text-align:center;padding-top:8px}
+.prof img{width:104px;height:104px;border-radius:32px;object-fit:cover;border:2px solid var(--pri-c)}
+.prof h2{font:700 26px 'Roboto Flex',Roboto;margin:14px 0 2px;display:flex;align-items:center;justify-content:center;gap:6px}
+.prof h2 svg{color:#5AB0FF;width:22px;height:22px}
+.prose{margin:20px 0;color:var(--txt2);font-size:15px;line-height:1.6}
+.prose b{color:var(--txt);font-weight:500}
+
+/* navigation bar (M3) */
+nav{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--s2);padding:12px 8px calc(16px + var(--bot));display:flex}
+nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;font:500 12px Roboto;color:var(--txt2);transition:color .2s}
+nav .pill{width:64px;height:32px;border-radius:16px;display:flex;align-items:center;justify-content:center;transition:background .25s var(--ease)}
+nav button.on{color:var(--txt)}
+nav button.on .pill{background:var(--pri-c);color:var(--on-pri-c)}
+
+/* player (full screen) */
+.layer{position:fixed;inset:0;z-index:60;background:var(--bg);overflow-y:auto;transform:translateX(100%);visibility:hidden;transition:transform .3s var(--ease),visibility .3s}
+.layer.on{transform:none;visibility:visible}
+.pbar{position:sticky;top:0;z-index:5;background:var(--bg);padding:calc(var(--top) + 8px) 8px 8px;display:flex;align-items:center;gap:4px}
+.icb{width:48px;height:48px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.pbar .t{min-width:0;flex:1}
+.pbar small{color:var(--pri);font-size:12px;font-weight:500;letter-spacing:.06em;text-transform:uppercase}
+.pbar b{display:block;font:500 16px Roboto}
+.vid{position:relative;aspect-ratio:16/9;background:#000;margin:0 16px;border-radius:20px;overflow:hidden}
+.vid video,.vid iframe{position:absolute;inset:0;width:100%;height:100%;border:0;background:#000}
+.lessons{padding:0 16px calc(24px + var(--bot))}
+.les{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:16px;margin-bottom:8px;background:var(--s1);min-height:64px}
+.les .n{width:32px;height:32px;border-radius:50%;background:var(--s3);display:flex;align-items:center;justify-content:center;font:500 13px Roboto;flex-shrink:0}
+.les .tt{flex:1;font-weight:500;font-size:14px}
+.les>svg{color:var(--out)}
+.les.on{background:var(--pri-c);color:var(--on-pri-c)}
+.les.on .n{background:var(--pri);color:var(--on-pri)}
+
+/* bottom sheet */
+.scrim{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.6);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
+.scrim.on{opacity:1;visibility:visible}
+.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--s2);border-radius:28px 28px 0 0;padding:12px 24px calc(24px + var(--bot));max-height:92%;overflow-y:auto;transform:translateY(100%);transition:transform .35s var(--ease)}
+.scrim.on .sheet{transform:none}
+.grab{width:32px;height:4px;border-radius:2px;background:var(--out);opacity:.5;margin:0 auto 20px}
+.sheet .big{width:56px;height:56px;border-radius:18px;margin:0 auto 12px}
+.sheet h3{font:500 24px 'Roboto Flex',Roboto;text-align:center}
+.sheet .sub{text-align:center;margin:4px 0 20px}
+.div{display:flex;align-items:center;gap:12px;color:var(--out);font-size:12px;margin:20px 0 16px}
+.div::before,.div::after{content:"";flex:1;height:1px;background:var(--outv)}
+.field{position:relative;margin-bottom:6px}
+.field input{width:100%;height:56px;border-radius:12px;border:1px solid var(--out);background:transparent;color:var(--txt);padding:0 16px;font-size:18px;letter-spacing:.2em;text-align:center;outline:0;text-transform:uppercase;transition:border-color .2s,box-shadow .2s}
+.field input:focus{border-color:var(--pri);box-shadow:0 0 0 1px var(--pri)}
+.field label{position:absolute;left:12px;top:-8px;background:var(--s2);padding:0 4px;font-size:12px;color:var(--txt2)}
+.field.bad input{border-color:var(--err);box-shadow:0 0 0 1px var(--err);animation:shake .3s}
+.field.bad label{color:var(--err)}
+.err{color:var(--err);font-size:12px;padding:0 16px;min-height:20px;margin-bottom:12px}
+@keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+
+/* snackbar */
+#snack{position:fixed;left:16px;right:16px;bottom:calc(100px + var(--bot));z-index:99;background:#E4E2E6;color:#1B1B1F;padding:14px 16px;border-radius:12px;font-size:14px;transform:translateY(24px);opacity:0;pointer-events:none;transition:all .25s var(--ease)}
+#snack.on{transform:none;opacity:1}
+</style>
+</head>
+<body>
+
+<div id="splash">
+  <img src="https://raw.githubusercontent.com/itsayushacharya/Learnwithayush/refs/heads/main/images/icon.png" alt="">
+  <b>LEARN WITH AYUSH</b><small>Master Your Digital Craft</small><i></i>
+</div>
+
+<header class="appbar" id="appbar">
+  <img src="https://raw.githubusercontent.com/itsayushacharya/Learnwithayush/refs/heads/main/images/icon.png" alt="">
+  <h1 id="barTitle">Learn with Ayush</h1>
+</header>
+
+<main>
+  <section id="p-home" class="page on">
+    <label class="search"><span data-i="search"></span><input id="q" type="search" placeholder="Search courses" autocomplete="off"></label>
+    <div class="hero">
+      <span class="tag">Learn • Grow • Build</span>
+      <h2>Master Your<br><em>Digital Craft</em></h2>
+      <p>International tech masterclasses in web development, design and AI.</p>
+      <button class="btn fill press" onclick="document.getElementById('all').scrollIntoView({behavior:'smooth'})"><span data-i="play"></span>Explore courses</button>
+    </div>
+    <div class="h">Continue learning <button class="press" onclick="tab('learning')">See all</button></div>
+    <div id="cont"></div>
+    <div class="h">Categories</div>
+    <div class="chips" id="chips"></div>
+    <div class="h" id="all">All courses <span class="sub" id="cnt" style="font:400 12px Roboto"></span></div>
+    <div id="grid" class="grid"></div>
+  </section>
+
+  <section id="p-learning" class="page">
+    <div class="h" style="margin-top:8px">My learning</div>
+    <p class="sub" style="margin:-4px 0 16px">Courses you've started.</p>
+    <div id="mine"></div>
+  </section>
+
+  <section id="p-about" class="page">
+    <div class="prof">
+      <img src="https://raw.githubusercontent.com/itsayushacharya/Learnwithayush/refs/heads/main/images/profile.jpg" alt="Ayush">
+      <h2>Ayush Acharya <span data-i="verified"></span></h2>
+      <p class="sub">Full-Stack Developer • Creator • Educator</p>
+    </div>
+    <p class="prose">Hey! I'm <b>Ayush Acharya</b>. Welcome to <b>Learn with Ayush</b> — a learning platform built to make modern tech simple and practical. From AI &amp; prompt engineering to production-ready web platforms, every course is built around real-world application.</p>
+    <div class="tile"><div class="ic">01</div><div class="t"><b>Project-based</b><span>Build portfolio-ready apps step by step.</span></div></div>
+    <div class="tile"><div class="ic">02</div><div class="t"><b>Bilingual &amp; clear</b><span>Easy explanations for every learner.</span></div></div>
+    <div class="tile"><div class="ic">03</div><div class="t"><b>Direct access</b><span>Support via WhatsApp &amp; email.</span></div></div>
+  </section>
+
+  <section id="p-support" class="page">
+    <div class="h" style="margin-top:8px">Need help?</div>
+    <p class="sub" style="margin:-4px 0 16px">Enrollment, access codes or technical guidance — reach out directly.</p>
+    <a class="tile press" href="https://wa.me/9779804363914?text=Hi%20Ayush" target="_blank" rel="noopener"><div class="ic" style="background:#12361f;color:#25D366"><span data-i="wa"></span></div><div class="t"><b>WhatsApp support</b><span>Fastest response for enrollment</span></div><span data-i="chev"></span></a>
+    <a class="tile press" href="mailto:support@ayushacharya.info.np"><div class="ic"><span data-i="mail"></span></div><div class="t"><b>Email support</b><span>Business &amp; partnership inquiries</span></div><span data-i="chev"></span></a>
+    <a class="tile press" href="https://blog.ayushacharya.info.np/" target="_blank" rel="noopener"><div class="ic" style="background:#16304d;color:#9CCBFF"><span data-i="article"></span></div><div class="t"><b>Read the blog</b><span>Articles &amp; tutorials</span></div><span data-i="chev"></span></a>
+  </section>
+</main>
+
+<nav>
+  <button class="on" data-tab="home" onclick="tab('home')"><div class="pill press"><span data-i="home"></span></div>Home</button>
+  <button data-tab="learning" onclick="tab('learning')"><div class="pill press"><span data-i="school"></span></div>Learning</button>
+  <button data-tab="about" onclick="tab('about')"><div class="pill press"><span data-i="person"></span></div>About</button>
+  <button data-tab="support" onclick="tab('support')"><div class="pill press"><span data-i="support"></span></div>Support</button>
+</nav>
+
+<!-- Player -->
+<div id="player" class="layer">
+  <div class="pbar">
+    <button class="icb press" onclick="history.back()" aria-label="Back"><span data-i="back"></span></button>
+    <div class="t"><small>Now playing</small><b id="vTitle" class="clamp1"></b></div>
+  </div>
+  <div class="vid" id="media"></div>
+  <p class="sub" id="vDesc" style="padding:16px"></p>
+  <div class="lessons"><div class="h" style="margin-top:0">Lessons <span class="sub" id="lc" style="font:400 12px Roboto"></span></div><div id="lessonList"></div></div>
+</div>
+
+<!-- Auth sheet -->
+<div id="scrim" class="scrim" onclick="if(event.target===this)history.back()">
+  <div class="sheet">
+    <div class="grab"></div>
+    <div class="ic big"><span data-i="lock" style="display:contents"></span></div>
+    <h3>Unlock masterclass</h3>
+    <p class="sub">Pay on WhatsApp to get your access code.</p>
+    <a id="waBtn" class="btn wa full press" target="_blank" rel="noopener" href="#"><span data-i="wa"></span>Order passcode</a>
+    <div class="div">or enter code</div>
+    <div class="field" id="field"><label for="code">Access code</label><input id="code" inputmode="text" autocomplete="off" placeholder="••••"></div>
+    <div class="err" id="err"></div>
+    <button class="btn fill full press" onclick="unlock()">Verify &amp; unlock</button>
+  </div>
+</div>
+
+<div id="snack"></div>
+
+<script>
+const I={
+ search:'M15.5 14h-.79l-.28-.27A6.47 6.47 0 0016 9.5 6.5 6.5 0 109.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z',
+ play:'M8 5v14l11-7z',
+ home:'M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z',
+ school:'M12 3L1 9l11 6 9-4.91V17h2V9L12 3zM5 13.18v4L12 21l7-3.82v-4L12 17l-7-3.82z',
+ person:'M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z',
+ support:'M12 1c-4.97 0-9 4.03-9 9v7c0 1.66 1.34 3 3 3h3v-8H5v-2c0-3.87 3.13-7 7-7s7 3.13 7 7v2h-4v8h3c1.66 0 3-1.34 3-3v-7c0-4.97-4.03-9-9-9z',
+ back:'M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z',
+ lock:'M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z',
+ mail:'M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z',
+ article:'M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z',
+ chev:'M10 6L8.59 7.41 13.17 12l-4.58 4.59L10 18l6-6z',
+ verified:'M23 12l-2.44-2.79.34-3.69-3.61-.82-1.89-3.2L12 2.96 8.6 1.5 6.71 4.69 3.1 5.5l.34 3.7L1 12l2.44 2.79-.34 3.7 3.61.82L8.6 22.5l3.4-1.47 3.4 1.46 1.89-3.19 3.61-.82-.34-3.69L23 12zm-12.91 4.72l-3.8-3.81 1.48-1.48 2.32 2.33 5.85-5.87 1.48 1.48-7.33 7.35z',
+ wa:'M.057 24l1.687-6.163a11.87 11.87 0 01-1.587-5.946C.16 5.335 5.495 0 12.05 0a11.82 11.82 0 018.413 3.488 11.82 11.82 0 013.48 8.414c-.003 6.557-5.338 11.892-11.893 11.892a11.9 11.9 0 01-5.688-1.448L.057 24zm6.597-3.807c1.676.995 3.276 1.591 5.316 1.592 5.448 0 9.886-4.438 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884 0 2.225.651 3.891 1.746 5.634l-.999 3.648 3.818-.981z'
+};
+const svg=n=>`<svg viewBox="0 0 24 24"><path d="${I[n]}"/></svg>`;
+const icons=(r=document)=>r.querySelectorAll('[data-i]').forEach(e=>{if(!e.firstChild)e.innerHTML=svg(e.dataset.i);if(e.style.display!=='contents')e.style.display='inline-flex'});
+
+const thumb=(a,b,bg,c)=>'data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450'><rect width='800' height='450' fill='${bg}'/><text x='400' y='215' font-family='sans-serif' font-weight='900' font-size='38' fill='#fff' text-anchor='middle'>${a}</text><text x='400' y='265' font-family='sans-serif' font-weight='900' font-size='28' fill='${c}' text-anchor='middle'>${b}</text></svg>`);
+
+const WA='9779804363914';
+const free=[{id:'free-1',category:'ai',title:'Create And Publish Website Using AI',thumbnail:thumb('CREATE WEBSITE','USING AI','#090d16','#38bdf8'),duration:'15:07',level:'Basic',desc:'Learn to communicate effectively with AI and create websites.',lessons:[{title:'Create And Publish Website Using AI',videoId:'https://ia601405.us.archive.org/35/items/create-and-publish-website-using-al-in-nepali-ayush-acharya-1080p/Create-and-Publish-Website-Using-Al-In-Nepali-Ayush-Acharya_1080p.mp4'}]}];
+const paid=[
+{id:'paid-1',category:'ai',title:'AI Prompt Engineering',badge:'Bestseller',thumbnail:thumb('AI PROMPT','ENGINEERING','#0f172a','#fbbf24'),duration:'2.5 Hrs',level:'All Levels',desc:'Master AI communication, automate workflows, build advanced prompts.',price:1000,passcodes:['0506',{start:2002,end:2058}],lessons:[{title:'01. Overview to AI',videoId:'https://ia601401.us.archive.org/25/items/overview-to-ai/Overview%20to%20AI.mp4'},{title:'02. AI Prompt Engineering Overview',videoId:'https://ia601008.us.archive.org/9/items/ai-prompt-engineering-overview/AI%20PROMPT%20ENGINEERING%20OVERVIEW.mp4'}]},
+{id:'paid-2',category:'web',title:'Website Development Masterclass',badge:'Popular',thumbnail:thumb('WEBSITE','DEVELOPMENT','#090d16','#fbbf24'),duration:'6.0 Hrs',level:'Beginner to Pro',desc:'Master HTML, CSS, Flexbox, Grid, JavaScript to build responsive websites.',price:1500,passcodes:[{start:2059,end:2089}],lessons:[{title:'01. Course Roadmap',videoId:'https://ia800905.us.archive.org/15/items/website-development-course-roadmap/Website%20Development%20Course%20Roadmap.mp4'},{title:'02. Intro to Web, Tools & HTML',videoId:'https://ia600109.us.archive.org/34/items/introduction-to-working-of-web-tools-html/Introduction%20to%20Working%20of%20Web%2C%20Tools%20%26%20HTML.mp4'}]}];
+const all=[...free.map(c=>({...c,type:'free'})),...paid.map(c=>({...c,type:'paid'}))];
+const cats=[['all','All'],['ai','AI & ML'],['web','Web Dev'],['free','Free'],['paid','Premium']];
+let cat='all',query='',active=null,stack=[];
+const $=id=>document.getElementById(id);
+
+/* storage (safe) */
+const KEY='lwa_enrolled_courses';
+const getE=()=>{try{return JSON.parse(localStorage.getItem(KEY)||'{}')}catch{return{}}};
+const setE=d=>{try{localStorage.setItem(KEY,JSON.stringify(d))}catch{}};
+function mark(c,i,n){const e=getE(),p=e[c.id];e[c.id]={id:c.id,title:c.title,thumbnail:c.thumbnail,duration:c.duration,level:c.level,type:c.type,totalLessons:n,currentLesson:i,progress:Math.round((i+1)/n*100),lastOpened:Date.now(),enrolledAt:p?.enrolledAt||Date.now()};setE(e);renderMine();renderCont()}
+function remove(id){const e=getE();delete e[id];setE(e);renderMine();renderCont();snack('Removed from My Learning')}
+
+function snack(t){const s=$('snack');s.textContent=t;s.classList.add('on');clearTimeout(snack.t);snack.t=setTimeout(()=>s.classList.remove('on'),2600)}
+
+/* tabs */
+const titles={home:'Learn with Ayush',learning:'My Learning',about:'About',support:'Support'};
+function tab(t){
+  document.querySelectorAll('.page').forEach(p=>p.classList.toggle('on',p.id==='p-'+t));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.tab===t));
+  $('barTitle').textContent=titles[t];
+  if(t==='home')renderCont(); if(t==='learning')renderMine();
+  scrollTo({top:0})
+}
+addEventListener('scroll',()=>$('appbar').classList.toggle('scrolled',scrollY>8),{passive:true});
+
+/* render */
+function renderChips(){$('chips').innerHTML=cats.map(([k,l])=>`<button class="chip press ${k===cat?'on':''}" onclick="setCat('${k}')">${l}</button>`).join('')}
+function setCat(k){cat=k;renderChips();renderCourses()}
+function renderCourses(){
+  const q=query.toLowerCase().trim();
+  const f=all.filter(c=>(!q||c.title.toLowerCase().includes(q)||c.desc.toLowerCase().includes(q))&&(cat==='all'||(cat==='free'||cat==='paid'?c.type===cat:c.category===cat)));
+  $('cnt').textContent=f.length+' course'+(f.length===1?'':'s');
+  $('grid').innerHTML=f.length?f.map(c=>{const fr=c.type==='free';return `
+  <article class="card"><div class="thumb"><img src="${c.thumbnail}" alt="" loading="lazy"><span class="badge ${c.type}">${fr?'Free':c.badge||'Premium'}</span><span class="dur">${c.duration}</span></div>
+  <div class="body"><h3 class="clamp2">${c.title}</h3><p class="clamp2">${c.desc}</p>
+  <div class="row" style="margin-bottom:14px"><span class="price ${c.type}">${fr?'Free':'Rs. '+c.price}</span><span class="lvl">${c.level}</span></div>
+  ${fr?`<button class="btn tonal full press" onclick="playFree('${c.id}')"><span data-i="play"></span>Start watching</button>`:`<button class="btn fill full press" onclick="auth('${c.id}')">Enroll now</button>`}</div></article>`}).join(''):`<div class="empty" style="grid-column:1/-1"><b>No courses found</b>Try a different search or category.</div>`;
+  icons($('grid'))
+}
+function renderMine(){
+  const l=Object.values(getE()).sort((a,b)=>b.lastOpened-a.lastOpened);
+  $('mine').innerHTML=l.length?l.map(c=>{const d=c.progress>=100;return `
+  <div class="card lcard press" onclick="resume('${c.id}',${c.currentLesson})"><div class="th"><img src="${c.thumbnail}" alt=""></div>
+  <div class="in"><b class="clamp2">${c.title}</b><small>${c.duration} • ${c.level||''}</small><div class="prog"><div style="width:${c.progress}%"></div></div>
+  <div class="row"><small style="color:${d?'var(--ok)':'var(--txt2)'}">${d?'Completed':c.progress+'% complete'}</small><button class="link press" onclick="event.stopPropagation();remove('${c.id}')">Remove</button></div></div></div>`}).join(''):
+  `<div class="empty"><div class="ic">${svg('school')}</div><b>No courses yet</b>Start a free lesson or enroll in a premium course to see it here.<br><button class="btn fill press" onclick="tab('home')">Browse courses</button></div>`
+}
+function renderCont(){
+  const c=Object.values(getE()).filter(x=>x.progress<100).sort((a,b)=>b.lastOpened-a.lastOpened)[0];
+  $('cont').innerHTML=c?`<div class="tile press" onclick="resume('${c.id}',${c.currentLesson})"><div class="ic">${svg('play')}</div><div class="t"><b class="clamp1">${c.title}</b><span>${c.progress}% • ${c.totalLessons} lessons</span><div class="prog"><div style="width:${c.progress}%"></div></div></div>${svg('chev')}</div>`:
+  `<div class="tile" style="opacity:.7"><div class="ic" style="background:var(--s3);color:var(--out)">${svg('play')}</div><div class="t"><b>Nothing in progress</b><span>Start a course to resume it here</span></div></div>`
+}
+
+/* layers + Android back button */
+function push(n){stack.push(n);history.pushState({n},'')}
+addEventListener('popstate',()=>{const n=stack.pop();if(n==='player'){$('media').innerHTML='';$('player').classList.remove('on');renderCont();renderMine()}if(n==='auth')$('scrim').classList.remove('on')});
+history.replaceState({n:'root'},'');
+
+/* player */
+function playFree(id){const c=free.find(x=>x.id===id);open({...c,type:'free'})}
+function resume(id,i){const c=all.find(x=>x.id===id);if(!c)return;if(c.type==='paid'&&!getE()[id]){auth(id);return}open(c,i)}
+function open(c,start){
+  start=start??(getE()[c.id]?.currentLesson||0);
+  $('vTitle').textContent=c.title;$('vDesc').textContent=c.desc;$('lc').textContent=c.lessons.length+' lessons';
+  $('lessonList').innerHTML=c.lessons.map((l,i)=>`<div class="les press" data-i="${i}"><div class="n">${i+1}</div><div class="tt clamp2">${l.title}</div>${svg('play')}</div>`).join('');
+  $('lessonList').onclick=e=>{const r=e.target.closest('.les');if(r)go(c,+r.dataset.i)};
+  if(!$('player').classList.contains('on')){$('player').classList.add('on');$('player').scrollTop=0;push('player')}
+  go(c,Math.max(0,Math.min(start,c.lessons.length-1)))
+}
+function go(c,i){
+  document.querySelectorAll('.les').forEach((e,k)=>e.classList.toggle('on',k===i));
+  const id=c.lessons[i].videoId,w=$('media');
+  w.innerHTML=/^https?:/.test(id)&&/\.(mp4|webm)/.test(id)?`<video src="${id}" controls autoplay playsinline></video>`:/^https?:/.test(id)?`<iframe src="${id}" allow="fullscreen;autoplay" allowfullscreen></iframe>`:`<iframe src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0" allow="fullscreen;autoplay;encrypted-media" allowfullscreen></iframe>`;
+  mark(c,i,c.lessons.length)
+}
+
+/* auth */
+function auth(id){
+  active=paid.find(c=>c.id===id);if(!active)return;
+  $('waBtn').href=`https://wa.me/${WA}?text=`+encodeURIComponent(`Hi Ayush, I want to buy "${active.title}" for Rs. ${active.price}.`);
+  $('code').value='';$('field').classList.remove('bad');$('err').textContent='';
+  $('scrim').classList.add('on');push('auth')
+}
+function unlock(){
+  const v=$('code').value.trim(),n=parseInt(v,10);
+  const ok=v&&active.passcodes.some(p=>typeof p==='string'?p===v:(n>=p.start&&n<=p.end));
+  if(ok){history.back();setTimeout(()=>{open({...active,type:'paid'});snack('Course unlocked')},320)}
+  else{$('field').classList.remove('bad');void $('field').offsetWidth;$('field').classList.add('bad');$('err').textContent='Invalid passcode. Please try again.'}
+}
+$('code').addEventListener('keydown',e=>{if(e.key==='Enter')unlock()});
+$('code').addEventListener('input',()=>{$('field').classList.remove('bad');$('err').textContent=''});
+$('q').addEventListener('input',e=>{query=e.target.value;renderCourses()});
+
+/* init */
+icons();renderChips();renderCourses();renderMine();renderCont();
+const hide=()=>{$('splash').classList.add('off');setTimeout(()=>$('splash').remove(),450)};
+addEventListener('load',()=>setTimeout(hide,700));setTimeout(hide,2500);
+</script>
+</body>
+</html>
