@@ -31,15 +31,51 @@ svg{width:24px;height:24px;fill:currentColor;flex-shrink:0}
 .press:active::after{opacity:.12}
 
 /* splash */
-#splash{position:fixed;inset:0;z-index:9999;background:var(--bg);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .4s var(--ease)}
-#splash.off{opacity:0;pointer-events:none}
-#splash img{width:96px;height:96px;border-radius:28px;object-fit:cover;animation:pop .8s var(--ease)}
-#splash b{margin-top:20px;font:700 20px 'Roboto Flex',Roboto;letter-spacing:.04em;color:var(--pri)}
-#splash small{margin-top:4px;color:var(--out);font-size:12px;letter-spacing:.2em;text-transform:uppercase}
-#splash i{margin-top:36px;width:120px;height:4px;border-radius:2px;background:var(--s3);overflow:hidden;position:relative}
-#splash i::after{content:"";position:absolute;inset:0;width:40%;background:var(--pri);border-radius:2px;animation:bar 1.1s infinite var(--ease)}
-@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
-@keyframes bar{from{transform:translateX(-100%)}to{transform:translateX(300%)}}
+#splash{position:fixed;inset:0;z-index:9999;background:radial-gradient(circle at 50% 38%,#2a2110 0%,var(--bg) 62%);display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity .6s var(--ease),transform .6s var(--ease)}
+#splash.off{opacity:0;transform:scale(1.06);pointer-events:none}
+.logo{position:relative;width:128px;height:128px;display:flex;align-items:center;justify-content:center}
+.logo::before,.logo::after{content:"";position:absolute;inset:0;border-radius:40px;border:2px solid var(--pri);opacity:0;animation:ring 2.4s infinite var(--ease)}
+.logo::after{animation-delay:1.2s}
+#splash img{width:96px;height:96px;border-radius:28px;object-fit:cover;box-shadow:0 12px 40px rgba(255,201,71,.25);animation:pop .9s var(--ease) both}
+#splash b{margin-top:28px;font:700 22px 'Roboto Flex',Roboto;letter-spacing:.14em;color:var(--txt);animation:rise .8s .5s var(--ease) both}
+#splash b em{font-style:normal;color:var(--pri)}
+#splash small{margin-top:8px;color:var(--txt2);font-size:12px;letter-spacing:.28em;text-transform:uppercase;animation:rise .8s .8s var(--ease) both}
+#splash i{margin-top:44px;width:140px;height:4px;border-radius:2px;background:var(--s3);overflow:hidden;animation:rise .6s 1s var(--ease) both}
+#splash i::after{content:"";display:block;height:100%;border-radius:2px;background:var(--pri);animation:fill 2.4s .4s var(--ease) forwards;width:0}
+#splash p{position:absolute;bottom:calc(32px + var(--bot));color:var(--out);font-size:12px;letter-spacing:.1em;animation:rise .8s 1.2s var(--ease) both}
+@keyframes pop{from{transform:scale(.5);opacity:0}to{transform:scale(1);opacity:1}}
+@keyframes rise{from{transform:translateY(14px);opacity:0}to{transform:none;opacity:1}}
+@keyframes fill{to{width:100%}}
+@keyframes ring{0%{transform:scale(.8);opacity:.6}100%{transform:scale(1.5);opacity:0}}
+
+/* polish */
+.ripple{position:absolute;border-radius:50%;background:currentColor;opacity:.2;transform:scale(0);animation:rp .55s var(--ease) forwards;pointer-events:none}
+@keyframes rp{to{transform:scale(1);opacity:0}}
+.greet{padding:4px 4px 16px}
+.greet small{color:var(--txt2);font-size:13px;letter-spacing:.02em}
+.greet h2{font:700 28px 'Roboto Flex',Roboto;margin-top:2px}
+.greet h2 em{font-style:normal;color:var(--pri)}
+.hero::before,.hero::after{content:"";position:absolute;border-radius:50%;background:var(--pri);opacity:.1}
+.hero::before{width:220px;height:220px;right:-70px;top:-70px}
+.hero::after{width:120px;height:120px;right:40px;bottom:-60px;opacity:.07}
+.hero>*{position:relative;z-index:1}
+.stats{display:flex;gap:8px;margin-top:16px}
+.stats div{flex:1;background:var(--s1);border:1px solid var(--outv);border-radius:16px;padding:12px;text-align:center}
+.stats b{display:block;font:700 20px 'Roboto Flex',Roboto;color:var(--pri)}
+.stats span{font-size:12px;color:var(--txt2)}
+.card{box-shadow:0 1px 2px rgba(0,0,0,.4),0 4px 16px rgba(0,0,0,.25);transition:transform .2s var(--ease)}
+.card:active{transform:scale(.985)}
+.thumb::after{content:"";position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.45),transparent 50%);pointer-events:none}
+.thumb img,.th img{opacity:0;transition:opacity .4s}
+.thumb img.ld,.th img.ld{opacity:1}
+.thumb,.th{background:linear-gradient(90deg,var(--s2),var(--s3),var(--s2));background-size:200% 100%;animation:sh 1.4s infinite linear}
+@keyframes sh{to{background-position:-200% 0}}
+.grid>*,#mine>*{animation:in .45s var(--ease) both}
+.grid>*:nth-child(2),#mine>*:nth-child(2){animation-delay:.07s}
+.grid>*:nth-child(3),#mine>*:nth-child(3){animation-delay:.14s}
+nav{box-shadow:0 -1px 0 var(--outv)}
+nav button.on .pill svg{transform:scale(1.08)}
+.btn:active{transform:scale(.97)}
 
 /* top app bar */
 .appbar{position:sticky;top:0;z-index:30;background:var(--bg);padding:calc(var(--top) + 8px) 16px 8px;display:flex;align-items:center;gap:12px;min-height:calc(var(--top) + 64px);transition:background .2s}
@@ -186,8 +222,9 @@ nav button.on .pill{background:var(--pri-c);color:var(--on-pri-c)}
 <body>
 
 <div id="splash">
-  <img src="https://raw.githubusercontent.com/itsayushacharya/Learnwithayush/refs/heads/main/images/icon.png" alt="">
-  <b>LEARN WITH AYUSH</b><small>Master Your Digital Craft</small><i></i>
+  <div class="logo"><img src="https://raw.githubusercontent.com/itsayushacharya/Learnwithayush/refs/heads/main/images/icon.png" alt=""></div>
+  <b>LEARN <em>WITH</em> AYUSH</b><small>Master Your Digital Craft</small><i></i>
+  <p>Learn • Grow • Build</p>
 </div>
 
 <header class="appbar" id="appbar">
@@ -197,6 +234,7 @@ nav button.on .pill{background:var(--pri-c);color:var(--on-pri-c)}
 
 <main>
   <section id="p-home" class="page on">
+    <div class="greet"><small id="gSmall"></small><h2 id="gHi"></h2></div>
     <label class="search"><span data-i="search"></span><input id="q" type="search" placeholder="Search courses" autocomplete="off"></label>
     <div class="hero">
       <span class="tag">Learn • Grow • Build</span>
@@ -204,6 +242,7 @@ nav button.on .pill{background:var(--pri-c);color:var(--on-pri-c)}
       <p>International tech masterclasses in web development, design and AI.</p>
       <button class="btn fill press" onclick="document.getElementById('all').scrollIntoView({behavior:'smooth'})"><span data-i="play"></span>Explore courses</button>
     </div>
+    <div class="stats"><div><b id="sC">0</b><span>Courses</span></div><div><b id="sF">0</b><span>Free</span></div><div><b id="sH">8.5h</b><span>Content</span></div></div>
     <div class="h">Continue learning <button class="press" onclick="tab('learning')">See all</button></div>
     <div id="cont"></div>
     <div class="h">Categories</div>
@@ -333,7 +372,7 @@ function renderCourses(){
   const f=all.filter(c=>(!q||c.title.toLowerCase().includes(q)||c.desc.toLowerCase().includes(q))&&(cat==='all'||(cat==='free'||cat==='paid'?c.type===cat:c.category===cat)));
   $('cnt').textContent=f.length+' course'+(f.length===1?'':'s');
   $('grid').innerHTML=f.length?f.map(c=>{const fr=c.type==='free';return `
-  <article class="card"><div class="thumb"><img src="${c.thumbnail}" alt="" loading="lazy"><span class="badge ${c.type}">${fr?'Free':c.badge||'Premium'}</span><span class="dur">${c.duration}</span></div>
+  <article class="card"><div class="thumb"><img src="${c.thumbnail}" alt="" loading="lazy" onload="this.classList.add('ld')"><span class="badge ${c.type}">${fr?'Free':c.badge||'Premium'}</span><span class="dur">${c.duration}</span></div>
   <div class="body"><h3 class="clamp2">${c.title}</h3><p class="clamp2">${c.desc}</p>
   <div class="row" style="margin-bottom:14px"><span class="price ${c.type}">${fr?'Free':'Rs. '+c.price}</span><span class="lvl">${c.level}</span></div>
   ${fr?`<button class="btn tonal full press" onclick="playFree('${c.id}')"><span data-i="play"></span>Start watching</button>`:`<button class="btn fill full press" onclick="auth('${c.id}')">Enroll now</button>`}</div></article>`}).join(''):`<div class="empty" style="grid-column:1/-1"><b>No courses found</b>Try a different search or category.</div>`;
@@ -342,7 +381,7 @@ function renderCourses(){
 function renderMine(){
   const l=Object.values(getE()).sort((a,b)=>b.lastOpened-a.lastOpened);
   $('mine').innerHTML=l.length?l.map(c=>{const d=c.progress>=100;return `
-  <div class="card lcard press" onclick="resume('${c.id}',${c.currentLesson})"><div class="th"><img src="${c.thumbnail}" alt=""></div>
+  <div class="card lcard press" onclick="resume('${c.id}',${c.currentLesson})"><div class="th"><img src="${c.thumbnail}" alt="" onload="this.classList.add('ld')"></div>
   <div class="in"><b class="clamp2">${c.title}</b><small>${c.duration} • ${c.level||''}</small><div class="prog"><div style="width:${c.progress}%"></div></div>
   <div class="row"><small style="color:${d?'var(--ok)':'var(--txt2)'}">${d?'Completed':c.progress+'% complete'}</small><button class="link press" onclick="event.stopPropagation();remove('${c.id}')">Remove</button></div></div></div>`}).join(''):
   `<div class="empty"><div class="ic">${svg('school')}</div><b>No courses yet</b>Start a free lesson or enroll in a premium course to see it here.<br><button class="btn fill press" onclick="tab('home')">Browse courses</button></div>`
@@ -395,8 +434,25 @@ $('q').addEventListener('input',e=>{query=e.target.value;renderCourses()});
 
 /* init */
 icons();renderChips();renderCourses();renderMine();renderCont();
-const hide=()=>{$('splash').classList.add('off');setTimeout(()=>$('splash').remove(),450)};
-addEventListener('load',()=>setTimeout(hide,700));setTimeout(hide,2500);
+/* greeting + stats */
+const h=new Date().getHours();
+$('gSmall').textContent=new Date().toLocaleDateString(undefined,{weekday:'long',day:'numeric',month:'long'});
+$('gHi').innerHTML=(h<12?'Good morning':h<17?'Good afternoon':'Good evening')+' <em>👋</em>';
+$('sC').textContent=all.length;$('sF').textContent=free.length;
+
+/* material ripple + haptics */
+document.addEventListener('pointerdown',e=>{
+  const t=e.target.closest('.press');if(!t)return;
+  const r=t.getBoundingClientRect(),d=Math.max(r.width,r.height)*2,x=document.createElement('span');
+  x.className='ripple';x.style.cssText=`width:${d}px;height:${d}px;left:${e.clientX-r.left-d/2}px;top:${e.clientY-r.top-d/2}px`;
+  t.appendChild(x);setTimeout(()=>x.remove(),600);
+  if(t.closest('nav')&&navigator.vibrate)navigator.vibrate(8);
+},{passive:true});
+
+/* splash: guaranteed minimum 2.8s so the intro animation completes */
+const t0=Date.now(),MIN=2800;
+const hide=()=>{const w=Math.max(0,MIN-(Date.now()-t0));setTimeout(()=>{const sp=$('splash');if(!sp)return;sp.classList.add('off');setTimeout(()=>sp.remove(),650)},w)};
+addEventListener('load',hide);setTimeout(hide,4000);
 </script>
 </body>
 </html>
