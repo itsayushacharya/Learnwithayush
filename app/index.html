@@ -182,16 +182,18 @@ nav button.on .pill{background:var(--pri-c);color:var(--on-pri-c)}
 .vid-wrap.playing .big-play{opacity:0}
 .vid-wrap.paused .big-play svg{transform:scale(1)}
 
+/* Controls layout: progress bar moved to bottom */
 .controls-overlay{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:flex-end;padding:0 20px 16px;background:linear-gradient(to top,rgba(0,0,0,.85) 0%,transparent 30%);opacity:var(--ctrl-opacity);transition:opacity .3s ease;pointer-events:none}
 .controls-overlay > *{pointer-events:auto}
 
-.progress-container{position:absolute;top:20px;left:20px;right:20px;height:4px;background:rgba(255,255,255,.2);border-radius:2px;cursor:pointer;transition:height .15s}
+/* progress bar now sits directly above the controls-row */
+.progress-container{position:relative;width:100%;height:4px;background:rgba(255,255,255,.2);border-radius:2px;cursor:pointer;transition:height .15s;margin-bottom:12px}
 .progress-container:hover{height:6px}
 .progress-fill{height:100%;background:var(--pri);width:0%;border-radius:2px;position:relative}
 .progress-thumb{position:absolute;right:-6px;top:50%;transform:translateY(-50%) scale(0);width:12px;height:12px;background:var(--pri);border-radius:50%;transition:transform .15s}
 .progress-container:hover .progress-thumb{transform:translateY(-50%) scale(1)}
 
-.controls-row{display:flex;align-items:center;gap:16px;color:#fff}
+.controls-row{display:flex;align-items:center;gap:16px;color:#fff;width:100%}
 .ctrl-btn{background:none;border:0;color:inherit;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:4px;border-radius:4px;transition:background .2s}
 .ctrl-btn:hover{background:rgba(255,255,255,.1)}
 .ctrl-btn svg{width:22px;height:22px;fill:currentColor}
@@ -226,26 +228,39 @@ nav button.on .pill{background:var(--pri-c);color:var(--on-pri-c)}
 .les.on{background:var(--pri-c);color:var(--on-pri-c)}
 .les.on .n{background:var(--pri);color:var(--on-pri)}
 
-.scrim{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.6);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s}
+/* auth sheet (centered) */
+.scrim{position:fixed;inset:0;z-index:80;background:rgba(0,0,0,.6);opacity:0;visibility:hidden;transition:opacity .25s,visibility .25s;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .scrim.on{opacity:1;visibility:visible}
-.sheet{position:absolute;left:0;right:0;bottom:0;background:var(--s2);border-radius:28px 28px 0 0;padding:12px 24px calc(24px + var(--bot));max-height:92%;overflow-y:auto;transform:translateY(100%);transition:transform .35s var(--ease)}
-.scrim.on .sheet{transform:none}
-.grab{width:32px;height:4px;border-radius:2px;background:var(--out);opacity:.5;margin:0 auto 20px}
-.sheet .big{width:56px;height:56px;border-radius:18px;margin:0 auto 12px}
-.sheet h3{font:500 24px 'Roboto Flex',Roboto;text-align:center}
-.sheet .sub{text-align:center;margin:4px 0 20px}
-.div{display:flex;align-items:center;gap:12px;color:var(--out);font-size:12px;margin:20px 0 16px}
+
+.sheet{background:var(--s2);border-radius:28px;padding:32px 24px;width:100%;max-width:380px;max-height:90vh;overflow-y:auto;transform:scale(0.95) translateY(10px);transition:transform .35s var(--ease);box-shadow:0 24px 48px rgba(0,0,0,0.4);display:flex;flex-direction:column;align-items:center}
+.scrim.on .sheet{transform:scale(1) translateY(0)}
+
+.grab{display:none}
+.sheet .big{width:64px;height:64px;border-radius:20px;margin:0 auto 20px;background:var(--pri-c);color:var(--pri);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sheet .big svg{width:32px;height:32px}
+.sheet h3{font:700 24px 'Roboto Flex',Roboto;text-align:center;color:#fff;margin-bottom:6px}
+.sheet .sub{text-align:center;font-size:14px;color:var(--txt2);margin-bottom:24px}
+
+.btn.wa{background:#25D366;color:#0F1115;border-radius:24px;height:52px;font-size:16px;font-weight:500;box-shadow:0 4px 12px rgba(37,211,102,0.2)}
+.btn.wa svg{width:22px;height:22px;fill:currentColor}
+
+.div{display:flex;align-items:center;gap:12px;color:var(--out);font-size:13px;margin:24px 0;width:100%}
 .div::before,.div::after{content:"";flex:1;height:1px;background:var(--outv)}
-.field{position:relative;margin-bottom:6px}
-.field input{width:100%;height:56px;border-radius:12px;border:1px solid var(--out);background:transparent;color:var(--txt);padding:0 16px;font-size:18px;letter-spacing:.2em;text-align:center;outline:0;text-transform:uppercase;transition:border-color .2s,box-shadow .2s}
-.field input:focus{border-color:var(--pri);box-shadow:0 0 0 1px var(--pri)}
-.field label{position:absolute;left:12px;top:-8px;background:var(--s2);padding:0 4px;font-size:12px;color:var(--txt2)}
-.field.bad input{border-color:var(--err);box-shadow:0 0 0 1px var(--err);animation:shake .3s}
+
+.field{position:relative;margin-bottom:16px;width:100%}
+.field input{width:100%;height:64px;border-radius:16px;border:1px solid var(--pri);background:transparent;color:var(--pri);padding:0 16px;font-size:24px;letter-spacing:.2em;text-align:center;outline:0;text-transform:uppercase;transition:border-color .2s,box-shadow .2s}
+.field input::placeholder{color:rgba(255,201,71,0.4)}
+.field input:focus{box-shadow:0 0 0 1px var(--pri)}
+.field label{position:absolute;left:16px;top:-8px;background:var(--s2);padding:0 6px;font-size:12px;color:var(--txt2)}
+.field.bad input{border-color:var(--err);box-shadow:0 0 0 1px var(--err);animation:shake .3s;color:var(--err)}
 .field.bad label{color:var(--err)}
-.err{color:var(--err);font-size:12px;padding:0 16px;min-height:20px;margin-bottom:12px}
+
+.err{color:var(--err);font-size:13px;text-align:center;min-height:20px;margin-bottom:8px;width:100%}
 @keyframes shake{25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
 
-#snack{position:fixed;left:16px;right:16px;bottom:calc(100px + var(--bot));z-index:99;background:#E4E2E6;color:#1B1B1F;padding:14px 16px;border-radius:12px;font-size:14px;transform:translateY(24px);opacity:0;pointer-events:none;transition:all .25s var(--ease)}
+.sheet .btn.fill{border-radius:16px;height:56px;font-size:16px;font-weight:600}
+
+#snack{position:fixed;left:16px;right:16px;bottom:calc(100px + var(--bot));z-index:99;background:#E4E2E6;color:#1B1B1F;padding:14px 16px;border-radius:12px;font-size:14px;transform:translateY(24px);opacity:0;pointer-events:none;transition:all .25s var(--ease);text-align:center}
 #snack.on{transform:none;opacity:1}
 </style>
 </head>
@@ -328,11 +343,13 @@ nav button.on .pill{background:var(--pri-c);color:var(--on-pri-c)}
       <svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
     </div>
     <div class="controls-overlay" id="overlay">
+      <!-- Progress Bar moved to bottom section -->
       <div class="progress-container" id="progressContainer">
         <div class="progress-fill" id="progressFill">
           <div class="progress-thumb"></div>
         </div>
       </div>
+      <!-- Controls Row -->
       <div class="controls-row">
         <button class="ctrl-btn" id="playPauseBtn">
           <svg viewBox="0 0 24 24" id="playIcon"><path d="M8 5v14l11-7z"/></svg>
@@ -387,17 +404,24 @@ nav button.on .pill{background:var(--pri-c);color:var(--on-pri-c)}
   <div class="lessons"><div class="h" style="margin-top:0">Lessons <span class="sub" id="lc" style="font:400 12px Roboto"></span></div><div id="lessonList"></div></div>
 </div>
 
-<!-- Auth sheet -->
+<!-- Auth sheet (Centered Modal) -->
 <div id="scrim" class="scrim" onclick="if(event.target===this)history.back()">
-  <div class="sheet">
-    <div class="grab"></div>
-    <div class="ic big"><span data-i="lock" style="display:contents"></span></div>
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="big"><span data-i="lock"></span></div>
     <h3>Unlock masterclass</h3>
     <p class="sub">Pay on WhatsApp to get your access code.</p>
+    
     <a id="waBtn" class="btn wa full press" target="_blank" rel="noopener" href="#"><span data-i="wa"></span>Order passcode</a>
+    
     <div class="div">or enter code</div>
-    <div class="field" id="field"><label for="code">Access code</label><input id="code" inputmode="text" autocomplete="off" placeholder="••••"></div>
+    
+    <div class="field" id="field">
+      <label for="code">Access code</label>
+      <input id="code" inputmode="text" autocomplete="off" placeholder="••••">
+    </div>
+    
     <div class="err" id="err"></div>
+    
     <button class="btn fill full press" onclick="unlock()">Verify &amp; unlock</button>
   </div>
 </div>
