@@ -53,140 +53,458 @@
         .course-card:hover .thumb-img {
             transform: scale(1.05);
         }
-        .video-container {
+
+        /* ============================================================
+           CUSTOM VIDEO PLAYER
+           ============================================================ */
+        .vp-shell {
             position: relative;
-            padding-bottom: 56.25%;
-            height: 0;
-            border-radius: 20px;
+            width: 100%;
+            aspect-ratio: 16 / 9;
+            border-radius: 24px;
             overflow: hidden;
-            box-shadow: 0 25px 60px rgba(0,0,0,0.8);
-            border: 1px solid rgba(255,255,255,0.1);
             background: #000;
+            box-shadow: 0 30px 70px -20px rgba(0,0,0,0.9), 0 0 0 1px rgba(255,255,255,0.06), 0 0 60px -10px rgba(251,191,36,0.08);
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
         }
-        .video-container iframe, .video-container video {
+        .vp-shell iframe {
             position: absolute;
-            top: 0;
-            left: 0;
+            inset: 0;
             width: 100%;
             height: 100%;
+            border: 0;
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(16px); }
-            to { opacity: 1; transform: translateY(0); }
+        .vp-video {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background: #000;
+            display: block;
         }
-        .animate-fade {
-            animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        /* Big center play button overlay when paused */
+        .vp-bigplay {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            z-index: 15;
         }
-        @keyframes popIn {
-            from { opacity: 0; transform: scale(0.92) translateY(20px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
+        .vp-bigplay.show {
+            opacity: 1;
         }
-        .animate-pop {
-            animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        .vp-bigplay button {
+            pointer-events: auto;
+            width: 84px;
+            height: 84px;
+            border-radius: 50%;
+            background: rgba(251, 191, 36, 0.95);
+            color: #0b1120;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 10px 40px rgba(251, 191, 36, 0.5), 0 0 0 8px rgba(251, 191, 36, 0.15);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            backdrop-filter: blur(4px);
         }
+        .vp-bigplay button:hover {
+            transform: scale(1.06);
+            box-shadow: 0 10px 50px rgba(251, 191, 36, 0.7), 0 0 0 10px rgba(251, 191, 36, 0.2);
+        }
+        .vp-bigplay button:active {
+            transform: scale(0.96);
+        }
+        /* Center loading spinner */
+        .vp-spinner {
+            position: absolute;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 14;
+            pointer-events: none;
+        }
+        .vp-spinner.show { display: flex; }
+        .vp-spinner .ring {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: 3px solid rgba(255,255,255,0.15);
+            border-top-color: #fbbf24;
+            animation: vpSpin 0.9s linear infinite;
+        }
+        @keyframes vpSpin { to { transform: rotate(360deg); } }
+
+        /* Error overlay */
+        .vp-error-overlay {
+            position: absolute;
+            inset: 0;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(3, 7, 18, 0.85);
+            color: #94a3b8;
+            z-index: 13;
+            padding: 20px;
+            text-align: center;
+            font-size: 14px;
+            pointer-events: none;
+        }
+        .vp-error-overlay.show { display: flex; }
+        .vp-error-overlay svg { width: 32px; height: 32px; margin-bottom: 12px; color: #ef4444; }
+
+        /* Gradient overlay behind controls */
+        .vp-top-gradient {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 100px;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.75), transparent);
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .vp-bottom-gradient {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 160px;
+            background: linear-gradient(to top, rgba(0,0,0,0.88), transparent);
+            pointer-events: none;
+            z-index: 5;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        .vp-shell:hover .vp-bottom-gradient,
+        .vp-shell:hover .vp-top-gradient,
+        .vp-shell.is-paused .vp-bottom-gradient,
+        .vp-shell.is-paused .vp-top-gradient {
+            opacity: 1;
+        }
+
+        /* Top bar (title) */
+        .vp-topbar {
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            padding: 16px 20px;
+            z-index: 10;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            opacity: 0;
+            transform: translateY(-8px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+            pointer-events: none;
+        }
+        .vp-shell:hover .vp-topbar,
+        .vp-shell.is-paused .vp-topbar {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        .vp-topbar .vp-chip {
+            font-size: 10px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: #fbbf24;
+            background: rgba(251, 191, 36, 0.12);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            padding: 5px 10px;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            backdrop-filter: blur(6px);
+        }
+        .vp-topbar .vp-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #f1f5f9;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-shadow: 0 1px 8px rgba(0,0,0,0.9);
+        }
+
+        /* Bottom controls */
+        .vp-controls {
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            z-index: 12;
+            padding: 8px 16px 14px;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .vp-shell:hover .vp-controls,
+        .vp-shell.is-paused .vp-controls,
+        .vp-shell.is-controls-visible .vp-controls {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Progress / seek bar */
+        .vp-progress {
+            position: relative;
+            width: 100%;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            margin-bottom: 6px;
+        }
+        .vp-progress-track {
+            position: relative;
+            width: 100%;
+            height: 5px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.18);
+            overflow: visible;
+            transition: height 0.15s ease;
+        }
+        .vp-progress:hover .vp-progress-track {
+            height: 7px;
+        }
+        .vp-progress-buffer {
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 0%;
+            background: rgba(255,255,255,0.3);
+            border-radius: 999px;
+        }
+        .vp-progress-played {
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 0%;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b);
+            border-radius: 999px;
+            box-shadow: 0 0 12px rgba(251,191,36,0.6);
+        }
+        .vp-progress-thumb {
+            position: absolute;
+            top: 50%;
+            left: 0%;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            background: #fbbf24;
+            border: 2.5px solid #0b1120;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.6), 0 0 0 0 rgba(251,191,36,0.4);
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 0.15s ease;
+            pointer-events: none;
+        }
+        .vp-progress:hover .vp-progress-thumb,
+        .vp-progress.is-scrubbing .vp-progress-thumb {
+            transform: translate(-50%, -50%) scale(1);
+        }
+        .vp-tooltip {
+            position: absolute;
+            bottom: 22px;
+            left: 0;
+            transform: translateX(-50%);
+            background: rgba(3, 7, 18, 0.95);
+            color: #fbbf24;
+            font-size: 11px;
+            font-weight: 700;
+            font-family: ui-monospace, monospace;
+            padding: 3px 8px;
+            border-radius: 6px;
+            border: 1px solid rgba(251,191,36,0.35);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.15s ease;
+            white-space: nowrap;
+            z-index: 20;
+        }
+        .vp-progress:hover .vp-tooltip,
+        .vp-progress.is-scrubbing .vp-tooltip {
+            opacity: 1;
+        }
+
+        /* Controls row */
+        .vp-row {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .vp-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 38px;
+            height: 38px;
+            border-radius: 10px;
+            color: #e2e8f0;
+            background: transparent;
+            border: 0;
+            cursor: pointer;
+            transition: background 0.15s ease, color 0.15s ease, transform 0.1s ease;
+        }
+        .vp-btn:hover {
+            background: rgba(255,255,255,0.1);
+            color: #fbbf24;
+        }
+        .vp-btn:active {
+            transform: scale(0.92);
+        }
+        .vp-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+        .vp-btn.wide {
+            width: auto;
+            padding: 0 10px;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 700;
+        }
+        .vp-time {
+            font-family: ui-monospace, monospace;
+            font-size: 12px;
+            font-weight: 600;
+            color: #cbd5e1;
+            margin: 0 8px;
+            white-space: nowrap;
+            letter-spacing: -0.02em;
+        }
+        .vp-time .cur { color: #fbbf24; }
+        .vp-time .sep { color: #475569; margin: 0 2px; }
+
+        /* Volume */
+        .vp-volume {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .vp-volume-slider {
+            width: 0;
+            height: 4px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.22);
+            position: relative;
+            overflow: hidden;
+            transition: width 0.25s ease;
+            cursor: pointer;
+            margin-right: 0;
+        }
+        .vp-volume:hover .vp-volume-slider,
+        .vp-volume-slider:focus-within {
+            width: 70px;
+            margin-right: 6px;
+        }
+        .vp-volume-fill {
+            position: absolute;
+            left: 0; top: 0; bottom: 0;
+            width: 100%;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b);
+            border-radius: 999px;
+        }
+
+        /* Speed menu */
+        .vp-speed-wrap { position: relative; }
+        .vp-speed-menu {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            right: 0;
+            background: rgba(3, 7, 18, 0.97);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            padding: 6px;
+            min-width: 90px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            backdrop-filter: blur(12px);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(6px);
+            transition: all 0.18s ease;
+            z-index: 30;
+        }
+        .vp-speed-menu.show {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        .vp-speed-menu button {
+            display: block;
+            width: 100%;
+            text-align: left;
+            padding: 7px 10px;
+            border-radius: 7px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #cbd5e1;
+            background: transparent;
+            border: 0;
+            cursor: pointer;
+            transition: background 0.12s ease, color 0.12s ease;
+            font-family: ui-monospace, monospace;
+        }
+        .vp-speed-menu button:hover {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+        }
+        .vp-speed-menu button.active {
+            background: rgba(251,191,36,0.15);
+            color: #fbbf24;
+        }
+
+        .vp-spacer { flex: 1; }
+
+        @media (max-width: 640px) {
+            .vp-shell { border-radius: 16px; }
+            .vp-controls { padding: 6px 10px 10px; }
+            .vp-btn { width: 34px; height: 34px; }
+            .vp-btn svg { width: 18px; height: 18px; }
+            .vp-time { font-size: 11px; margin: 0 4px; }
+            .vp-volume-slider { display: none; }
+            .vp-topbar { padding: 12px 14px; }
+            .vp-topbar .vp-title { font-size: 12px; }
+            .vp-bigplay button { width: 68px; height: 68px; }
+        }
+        @media (hover: none) {
+            .vp-volume-slider { display: none; }
+        }
+
+        /* ============================================================
+           REST OF SITE
+           ============================================================ */
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade { animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes popIn { from { opacity: 0; transform: scale(0.92) translateY(20px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .animate-pop { animation: popIn 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 10px; }
         ::-webkit-scrollbar-thumb:hover { background: #334155; }
-        .active-lesson {
-            border-color: rgba(251, 191, 36, 0.6) !important;
-            background: rgba(251, 191, 36, 0.12) !important;
-            color: #fbbf24 !important;
-        }
-        .filter-btn.active {
-            background: #fbbf24;
-            color: #000;
-            font-weight: 700;
-        }
-        .hero-gradient-text {
-            background: linear-gradient(to right, #fbbf24, #f59e0b);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        .mask-image-gradient {
-            mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-            -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%);
-        }
-        .carousel-container {
-            overflow: hidden;
-            position: relative;
-        }
-        .carousel-track {
-            display: flex;
-            gap: 1.5rem;
-            transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-            will-change: transform;
-            padding-bottom: 0.5rem;
-            cursor: grab;
-        }
-        .carousel-track:active {
-            cursor: grabbing;
-        }
-        .carousel-track > * {
-            flex: 0 0 auto;
-            width: calc(25% - 1.125rem);
-            min-width: 280px;
-        }
-        @media (max-width: 1024px) {
-            .carousel-track > * {
-                width: calc(33.333% - 1rem);
-            }
-        }
-        @media (max-width: 768px) {
-            .carousel-track > * {
-                width: calc(50% - 0.75rem);
-                min-width: 260px;
-            }
-        }
-        .carousel-btn {
-            transition: all 0.25s ease;
-            backdrop-filter: blur(8px);
-        }
-        .carousel-btn:hover {
-            background: rgba(251, 191, 36, 0.9);
-            color: #000;
-            border-color: #fbbf24;
-        }
-        .price-tag {
-            font-size: 1.75rem;
-            line-height: 1;
-            font-weight: 900;
-            letter-spacing: -0.03em;
-            color: #fbbf24;
-        }
-        .price-tag small {
-            font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 0.02em;
-            color: #94a3b8;
-        }
+        .filter-btn.active { background: #fbbf24; color: #000; font-weight: 700; }
+        .hero-gradient-text { background: linear-gradient(to right, #fbbf24, #f59e0b); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .mask-image-gradient { mask-image: linear-gradient(to bottom, black 80%, transparent 100%); -webkit-mask-image: linear-gradient(to bottom, black 80%, transparent 100%); }
+        .carousel-container { overflow: hidden; position: relative; }
+        .carousel-track { display: flex; gap: 1.5rem; transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94); will-change: transform; padding-bottom: 0.5rem; cursor: grab; }
+        .carousel-track:active { cursor: grabbing; }
+        .carousel-track > * { flex: 0 0 auto; width: calc(25% - 1.125rem); min-width: 280px; }
+        @media (max-width: 1024px) { .carousel-track > * { width: calc(33.333% - 1rem); } }
+        @media (max-width: 768px) { .carousel-track > * { width: calc(50% - 0.75rem); min-width: 260px; } }
+        .carousel-btn { transition: all 0.25s ease; backdrop-filter: blur(8px); }
+        .carousel-btn:hover { background: rgba(251, 191, 36, 0.9); color: #000; border-color: #fbbf24; }
+        .price-tag { font-size: 1.75rem; line-height: 1; font-weight: 900; letter-spacing: -0.03em; color: #fbbf24; }
+        .price-tag small { font-size: 0.75rem; font-weight: 600; letter-spacing: 0.02em; color: #94a3b8; }
         @media (max-width: 640px) {
             .carousel-btn-group { display: none !important; }
             .carousel-container { overflow: visible !important; }
-            .carousel-track {
-                display: grid !important;
-                grid-template-columns: 1fr !important;
-                gap: 1.25rem !important;
-                transform: none !important;
-                transition: none !important;
-                cursor: default !important;
-                width: 100% !important;
-            }
-            .carousel-track > * {
-                width: 100% !important;
-                min-width: unset !important;
-                flex: none !important;
-            }
+            .carousel-track { display: grid !important; grid-template-columns: 1fr !important; gap: 1.25rem !important; transform: none !important; transition: none !important; cursor: default !important; width: 100% !important; }
+            .carousel-track > * { width: 100% !important; min-width: unset !important; flex: none !important; }
         }
-        /* Download popup animations */
-        @keyframes floatPhone {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-8px); }
-        }
+        @keyframes floatPhone { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
         .float-phone { animation: floatPhone 4s ease-in-out infinite; }
-        @keyframes pulseGlow {
-            0%, 100% { box-shadow: 0 0 30px rgba(251, 191, 36, 0.15); }
-            50% { box-shadow: 0 0 50px rgba(251, 191, 36, 0.35); }
-        }
+        @keyframes pulseGlow { 0%, 100% { box-shadow: 0 0 30px rgba(251, 191, 36, 0.15); } 50% { box-shadow: 0 0 50px rgba(251, 191, 36, 0.35); } }
         .pulse-glow { animation: pulseGlow 3s ease-in-out infinite; }
     </style>
 </head>
@@ -195,7 +513,6 @@
     <!-- Navigation -->
     <nav class="sticky top-0 z-50 glass-nav px-6 py-4">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <!-- Logo -->
             <div class="flex items-center justify-between w-full md:w-auto">
                 <h1 class="text-xl font-black tracking-tighter flex items-center gap-3 cursor-pointer group" onclick="showSection('dashboard')">
                     <img src="https://raw.githubusercontent.com/itsayushacharya/Learnwithayush/refs/heads/main/images/icon.png"
@@ -207,16 +524,12 @@
                     </div>
                 </h1>
             </div>
-
-            <!-- Center Nav Links -->
             <div class="hidden md:flex items-center gap-1 text-xs font-semibold text-slate-400 bg-slate-900/80 p-1.5 rounded-full border border-white/10">
                 <button onclick="showSection('dashboard')" id="nav-courses" class="px-5 py-2 rounded-full hover:text-white transition text-white bg-white/10">Courses</button>
                 <button onclick="showSection('about')" id="nav-about" class="px-5 py-2 rounded-full hover:text-white transition">About</button>
                 <a href="https://blog.ayushacharya.info.np/" target="_blank" class="px-5 py-2 rounded-full hover:text-white transition">Blog</a>
                 <button onclick="showSection('contact')" id="nav-contact" class="px-5 py-2 rounded-full hover:text-white transition">Contact</button>
             </div>
-
-            <!-- Right Side: Download Android App Button -->
             <div class="flex items-center gap-3 w-full md:w-auto justify-end">
                 <button onclick="openAppPopup()" 
                         class="group relative flex items-center gap-2.5 bg-gradient-to-br from-yellow-400 via-yellow-400 to-amber-500 text-slate-950 px-5 py-2.5 rounded-full font-black text-[11px] uppercase tracking-wider transition-all duration-300 shadow-[0_0_20px_rgba(251,191,36,0.3)] hover:shadow-[0_0_30px_rgba(251,191,36,0.55)] hover:-translate-y-0.5 active:translate-y-0 overflow-hidden">
@@ -228,39 +541,31 @@
                         <span class="text-[8px] font-bold tracking-widest opacity-70">GET IT ON</span>
                         <span class="text-[12px] font-black tracking-tight">Android App</span>
                     </span>
-                    <svg class="w-3.5 h-3.5 relative z-10 transition-transform duration-300 group-hover:translate-x-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M14 5l7 7m0 0l-7 7m7-7H3"/>
-                    </svg>
                 </button>
             </div>
         </div>
     </nav>
 
-    <!-- Main Content Container -->
+    <!-- Main Content -->
     <main class="mb-auto">
         <!-- Dashboard Section -->
         <div id="dashboard" class="max-w-7xl mx-auto px-6 py-8 animate-fade">
-            
-            <!-- HERO SECTION -->
+            <!-- HERO -->
             <div class="relative rounded-[2.5rem] overflow-hidden bg-slate-900/40 border border-white/5 mb-16 flex flex-col lg:flex-row items-center shadow-2xl min-h-[500px]">
                 <div class="absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-900/80 to-transparent pointer-events-none z-0"></div>
                 <div class="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-500/10 blur-[120px] rounded-full pointer-events-none"></div>
-                
                 <div class="relative z-10 w-full lg:w-1/2 p-8 md:p-12 lg:pl-16">
                     <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-white/10 text-slate-300 text-xs font-bold uppercase tracking-wider mb-6 backdrop-blur-sm">
                         <svg class="w-4 h-4 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.33 9.38a1 1 0 00-.788 0l-.588.252a1 1 0 00-.586.91V15a1 1 0 00.586.91l7 3a1 1 0 00.788 0l7-3a1 1 0 00.586-.91v-4.458a1 1 0 00-.586-.91l-.588-.252a1 1 0 00-.788 0l-6.412 2.748a1 1 0 01-.788 0L3.33 9.38z"/></svg>
                         LEARN • GROW • BUILD
                     </div>
-                    
                     <h1 class="text-5xl md:text-6xl lg:text-7xl font-black tracking-tight mb-6 leading-[1.1]">
                         Master Your<br>
                         <span class="hero-gradient-text">Digital Craft</span>
                     </h1>
-                    
                     <p class="text-slate-400 text-sm md:text-base max-w-lg leading-relaxed mb-8">
                         Join my international tech masterclasses and learn web development, design, video editing, and more — from beginner to pro!
                     </p>
-                    
                     <div class="flex flex-wrap items-center gap-4 mb-10">
                         <button onclick="document.getElementById('courseCarouselSection').scrollIntoView({behavior: 'smooth'})" class="bg-yellow-400 text-slate-950 px-6 py-3 rounded-full font-bold text-sm hover:bg-yellow-300 transition flex items-center gap-2 shadow-lg shadow-yellow-400/20">
                             <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z"/></svg>
@@ -268,7 +573,6 @@
                         </button>
                     </div>
                 </div>
-
                 <div class="relative z-10 w-full lg:w-1/2 h-full min-h-[400px] lg:min-h-[600px] flex items-end justify-center lg:justify-end">
                     <img src="https://raw.githubusercontent.com/itsayushacharya/Learnwithayush/refs/heads/main/images/profile.jpg" alt="Ayush Acharya" class="relative z-20 object-cover object-top h-full w-full max-h-[600px] lg:max-h-[700px] rounded-b-[2.5rem] lg:rounded-b-none lg:rounded-r-[2.5rem] mask-image-gradient">
                     <div class="absolute bottom-8 right-8 z-30 text-right">
@@ -278,7 +582,7 @@
                 </div>
             </div>
 
-            <!-- Courses Carousel Section -->
+            <!-- Courses Carousel -->
             <div id="courseCarouselSection">
                 <div class="flex items-center justify-between mb-6">
                     <div>
@@ -294,24 +598,19 @@
                         </button>
                     </div>
                 </div>
-
                 <div class="flex items-center justify-between flex-wrap gap-4 mb-6 pb-4 border-b border-white/5">
                     <div class="flex items-center gap-2 overflow-x-auto pb-2 md:pb-0">
-                        <button onclick="filterCategory('all')" class="filter-btn active px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-slate-900 border border-white/5 hover:border-yellow-400/30 transition">All Courses</button>
-                        <button onclick="filterCategory('ai')" class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-slate-900 border border-white/5 hover:border-yellow-400/30 transition">AI & ML</button>
-                        <button onclick="filterCategory('web')" class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-slate-900 border border-white/5 hover:border-yellow-400/30 transition">Web Dev</button>
-                        <button onclick="filterCategory('free')" class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-slate-900 border border-white/5 hover:border-yellow-400/30 transition">Free Only</button>
-                        <button onclick="filterCategory('paid')" class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-slate-900 border border-white/5 hover:border-yellow-400/30 transition">Premium</button>
+                        <button onclick="filterCategory('all', event)" class="filter-btn active px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-slate-900 border border-white/5 hover:border-yellow-400/30 transition">All Courses</button>
+                        <button onclick="filterCategory('ai', event)" class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-slate-900 border border-white/5 hover:border-yellow-400/30 transition">AI & ML</button>
+                        <button onclick="filterCategory('web', event)" class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-slate-900 border border-white/5 hover:border-yellow-400/30 transition">Web Dev</button>
+                        <button onclick="filterCategory('free', event)" class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-slate-900 border border-white/5 hover:border-yellow-400/30 transition">Free Only</button>
+                        <button onclick="filterCategory('paid', event)" class="filter-btn px-4 py-2 rounded-xl text-xs font-semibold text-slate-300 bg-slate-900 border border-white/5 hover:border-yellow-400/30 transition">Premium</button>
                     </div>
-                    <div class="text-xs text-slate-500 font-medium" id="courseCountBadge">
-                        Showing all courses
-                    </div>
+                    <div class="text-xs text-slate-500 font-medium" id="courseCountBadge">Showing all courses</div>
                 </div>
-
                 <div class="carousel-container">
                     <div id="carouselTrack" class="carousel-track"></div>
                 </div>
-
                 <div class="mt-8 p-5 rounded-2xl bg-slate-900/60 border border-white/5 flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div class="flex items-center gap-3">
                         <div class="w-9 h-9 rounded-full bg-yellow-400/10 border border-yellow-400/20 flex items-center justify-center text-yellow-400">
@@ -329,17 +628,14 @@
             </div>
         </div>
 
-        <!-- About Section -->
+        <!-- About -->
         <div id="about" class="max-w-5xl mx-auto px-6 py-16 hidden animate-fade">
             <div class="glass-card p-8 md:p-12 rounded-3xl relative overflow-hidden">
                 <div class="absolute -top-24 -right-24 w-72 h-72 bg-yellow-400/10 rounded-full blur-3xl pointer-events-none"></div>
-                
                 <div class="flex flex-col md:flex-row items-center gap-8 mb-10">
                     <div class="relative group">
                         <img src="https://raw.githubusercontent.com/itsayushacharya/Learnwithayush/refs/heads/main/images/profile.jpg" alt="Ayush Acharya" class="w-32 h-32 rounded-3xl object-cover shadow-2xl shadow-yellow-500/20 shrink-0 border-2 border-yellow-400/30">
-                        <div class="absolute -bottom-2 -right-2 bg-slate-950 border border-white/10 px-3 py-1 rounded-full text-[10px] font-bold text-yellow-400">
-                            VERIFIED
-                        </div>
+                        <div class="absolute -bottom-2 -right-2 bg-slate-950 border border-white/10 px-3 py-1 rounded-full text-[10px] font-bold text-yellow-400">VERIFIED</div>
                     </div>
                     <div class="text-center md:text-left">
                         <span class="text-xs font-bold uppercase tracking-widest text-yellow-400 bg-yellow-400/10 px-3 py-1 rounded-full border border-yellow-400/20">Instructor & Creator</span>
@@ -347,16 +643,10 @@
                         <p class="text-slate-400 text-sm mt-1">Full-Stack Developer • Tech Content Creator • Educator</p>
                     </div>
                 </div>
-
                 <div class="space-y-6 text-slate-300 text-sm md:text-base leading-relaxed border-t border-white/5 pt-8">
-                    <p>
-                        Hey! I'm <strong class="text-white">Ayush Acharya</strong>. Welcome to <strong class="text-yellow-400">Learn with Ayush</strong>—an international learning platform engineered to make modern tech concepts simple, practical, and accessible for everyone.
-                    </p>
-                    <p>
-                        From mastering modern Artificial Intelligence & Prompt Engineering to building production-ready web platforms from scratch, every course is designed with real-world application at its core.
-                    </p>
+                    <p>Hey! I'm <strong class="text-white">Ayush Acharya</strong>. Welcome to <strong class="text-yellow-400">Learn with Ayush</strong>—an international learning platform engineered to make modern tech concepts simple, practical, and accessible for everyone.</p>
+                    <p>From mastering modern Artificial Intelligence & Prompt Engineering to building production-ready web platforms from scratch, every course is designed with real-world application at its core.</p>
                 </div>
-
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10 pt-10 border-t border-white/5">
                     <div class="p-6 rounded-2xl bg-slate-900/50 border border-white/5">
                         <div class="w-10 h-10 bg-yellow-400/10 rounded-xl flex items-center justify-center text-yellow-400 font-bold mb-3">01</div>
@@ -377,14 +667,13 @@
             </div>
         </div>
 
-        <!-- Contact / Support Section -->
+        <!-- Contact -->
         <div id="contact" class="max-w-4xl mx-auto px-6 py-16 hidden animate-fade">
             <div class="text-center mb-12">
                 <span class="text-xs font-bold uppercase tracking-widest text-yellow-400 bg-yellow-400/10 px-3.5 py-1.5 rounded-full border border-yellow-400/20">Direct Assistance</span>
                 <h2 class="text-3xl md:text-5xl font-black text-white mt-4 mb-3">Need Help or Support?</h2>
                 <p class="text-slate-400 text-sm md:text-base max-w-lg mx-auto">Have queries about course enrollment, access codes, or technical guidance? Reach out directly.</p>
             </div>
-
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div class="glass-card p-8 rounded-3xl text-center flex flex-col items-center justify-between group hover:border-yellow-400/30 transition">
                     <div>
@@ -394,11 +683,10 @@
                         <h3 class="text-xl font-bold text-white mb-1">Email Support</h3>
                         <p class="text-xs text-slate-400 mb-6">Inquiries, business partnerships, or enrollment assistance.</p>
                     </div>
-                    <a href="/cdn-cgi/l/email-protection#690a06071d080a1d29050c081b071e001d0108101c1a01470a0604" class="w-full bg-white/5 border border-white/10 hover:border-yellow-400/50 py-3.5 rounded-xl text-xs font-bold text-yellow-400 hover:bg-yellow-400 hover:text-black transition break-all">
-                        <span class="__cf_email__" data-cfemail="c3a0acadb7a2a0b783afa6a2b1adb4aab7aba2bab6b0abeda0acae">[email&#160;protected]</span>
+                    <a href="mailto:contact@ayushacharya.info.np" class="w-full bg-white/5 border border-white/10 hover:border-yellow-400/50 py-3.5 rounded-xl text-xs font-bold text-yellow-400 hover:bg-yellow-400 hover:text-black transition break-all">
+                        contact@ayushacharya.info.np
                     </a>
                 </div>
-
                 <div class="glass-card p-8 rounded-3xl text-center flex flex-col items-center justify-between group hover:border-emerald-500/30 transition">
                     <div>
                         <div class="w-16 h-16 bg-[#25D366]/10 rounded-2xl flex items-center justify-center text-[#25D366] mx-auto mb-4 group-hover:scale-110 transition-transform">
@@ -414,119 +702,219 @@
             </div>
         </div>
 
-        <!-- Video Player Section -->
+        <!-- ============================================ -->
+        <!-- VIDEO PLAYER SECTION                         -->
+        <!-- ============================================ -->
         <div id="player" class="max-w-7xl mx-auto px-6 py-12 hidden animate-fade">
             <button onclick="showSection('dashboard')" class="mb-8 text-xs font-bold uppercase tracking-[0.2em] text-slate-400 hover:text-white flex items-center gap-2 group transition">
                 <span class="w-8 h-8 rounded-full border border-white/10 flex items-center justify-center group-hover:bg-yellow-400 group-hover:text-black group-hover:border-yellow-400 transition">←</span> Back to All Courses
             </button>
 
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-10">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                <!-- Left: video + meta -->
                 <div class="lg:col-span-8">
-                    <div class="video-container" id="mediaWrapper"></div>
-                    <div class="mt-6 flex items-center justify-between flex-wrap gap-4 border-b border-white/10 pb-6">
-                        <div>
-                            <span class="text-[10px] font-bold text-yellow-400 uppercase tracking-widest bg-yellow-400/10 px-3 py-1 rounded-full border border-yellow-400/20">Active Lesson</span>
-                            <h2 id="vidTitle" class="text-2xl md:text-3xl font-black mt-2 text-white">Course Title</h2>
+                    <!-- Custom video player shell -->
+                    <div class="vp-shell" id="vpShell">
+                        <!-- Media gets injected here by JS -->
+                        <div id="vpMedia" class="absolute inset-0"></div>
+
+                        <!-- Overlay gradients -->
+                        <div class="vp-top-gradient"></div>
+                        <div class="vp-bottom-gradient"></div>
+
+                        <!-- Spinner -->
+                        <div class="vp-spinner" id="vpSpinner"><div class="ring"></div></div>
+
+                        <!-- Error Overlay -->
+                        <div class="vp-error-overlay" id="vpErrorOverlay">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            <p>Unable to load video.<br>The source may be temporarily unavailable.</p>
+                        </div>
+
+                        <!-- Big center play button -->
+                        <div class="vp-bigplay" id="vpBigPlay">
+                            <button id="vpBigPlayBtn" aria-label="Play">
+                                <svg width="36" height="36" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                            </button>
+                        </div>
+
+                        <!-- Top bar -->
+                        <div class="vp-topbar">
+                            <span class="vp-chip">
+                                <span style="width:6px;height:6px;background:#fbbf24;border-radius:50%;display:inline-block;"></span>
+                                <span id="vpLessonTag">Lesson 1</span>
+                            </span>
+                            <span class="vp-title" id="vpTopTitle">Course Title</span>
+                        </div>
+
+                        <!-- Bottom controls -->
+                        <div class="vp-controls" id="vpControls">
+                            <!-- Progress bar -->
+                            <div class="vp-progress" id="vpProgress">
+                                <div class="vp-progress-track">
+                                    <div class="vp-progress-buffer" id="vpBuffer"></div>
+                                    <div class="vp-progress-played" id="vpPlayed"></div>
+                                    <div class="vp-progress-thumb" id="vpThumb"></div>
+                                </div>
+                                <div class="vp-tooltip" id="vpTooltip">0:00</div>
+                            </div>
+
+                            <!-- Buttons row -->
+                            <div class="vp-row">
+                                <!-- Play / Pause -->
+                                <button class="vp-btn" id="vpPlayBtn" aria-label="Play">
+                                    <svg id="vpPlayIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+                                    <svg id="vpPauseIcon" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+                                </button>
+
+                                <!-- Rewind 10s -->
+                                <button class="vp-btn" id="vpRewindBtn" aria-label="Rewind 10 seconds" title="Rewind 10s">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/>
+                                        <text x="9" y="16" font-size="6" font-weight="700" fill="currentColor" stroke="none">10</text>
+                                    </svg>
+                                </button>
+
+                                <!-- Forward 10s -->
+                                <button class="vp-btn" id="vpForwardBtn" aria-label="Forward 10 seconds" title="Forward 10s">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/>
+                                        <text x="6" y="16" font-size="6" font-weight="700" fill="currentColor" stroke="none">10</text>
+                                    </svg>
+                                </button>
+
+                                <!-- Time -->
+                                <span class="vp-time"><span class="cur" id="vpCurTime">0:00</span><span class="sep">/</span><span id="vpDurTime">0:00</span></span>
+
+                                <div class="vp-spacer"></div>
+
+                                <!-- Volume -->
+                                <div class="vp-volume" id="vpVolumeWrap">
+                                    <button class="vp-btn" id="vpMuteBtn" aria-label="Mute">
+                                        <svg id="vpVolOnIcon" viewBox="0 0 24 24" fill="currentColor"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05A4.5 4.5 0 0 0 16.5 12zM14 3.23v2.06a7 7 0 0 1 0 13.42v2.06a9 9 0 0 0 0-17.54z"/></svg>
+                                        <svg id="vpVolOffIcon" viewBox="0 0 24 24" fill="currentColor" style="display:none"><path d="M16.5 12A4.5 4.5 0 0 0 14 7.97v2.21l2.45 2.45c.03-.2.05-.41.05-.63zM19 12c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.95 8.95 0 0 0 21 12a9 9 0 0 0-7-8.77v2.06A6.99 6.99 0 0 1 19 12zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06a8.99 8.99 0 0 0 3.69-1.81L19.73 21 21 19.73 4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+                                    </button>
+                                    <div class="vp-volume-slider" id="vpVolSlider">
+                                        <div class="vp-volume-fill" id="vpVolFill"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Speed -->
+                                <div class="vp-speed-wrap">
+                                    <button class="vp-btn wide" id="vpSpeedBtn" aria-label="Playback speed">
+                                        <span id="vpSpeedLabel">1×</span>
+                                    </button>
+                                    <div class="vp-speed-menu" id="vpSpeedMenu">
+                                        <button data-speed="0.5">0.5×</button>
+                                        <button data-speed="0.75">0.75×</button>
+                                        <button data-speed="1" class="active">1×</button>
+                                        <button data-speed="1.25">1.25×</button>
+                                        <button data-speed="1.5">1.5×</button>
+                                        <button data-speed="2">2×</button>
+                                    </div>
+                                </div>
+
+                                <!-- PiP -->
+                                <button class="vp-btn" id="vpPipBtn" aria-label="Picture in Picture" title="Picture in Picture">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <rect x="2" y="4" width="20" height="16" rx="2"/>
+                                        <rect x="12" y="12" width="8" height="6" rx="1" fill="currentColor" stroke="none"/>
+                                    </svg>
+                                </button>
+
+                                <!-- Fullscreen -->
+                                <button class="vp-btn" id="vpFullBtn" aria-label="Fullscreen">
+                                    <svg id="vpFullIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                        <path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/>
+                                    </svg>
+                                    <svg id="vpExitFullIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none">
+                                        <path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M3 16h3a2 2 0 0 1 2 2v3M16 21v-3a2 2 0 0 1 2-2h3"/>
+                                    </svg>
+                                </button>
+                            </div>
                         </div>
                     </div>
-                    <p id="vidDesc" class="text-slate-400 mt-4 leading-relaxed max-w-3xl text-sm md:text-base"></p>
+
+                    <!-- Meta bar -->
+                    <div class="mt-6 p-5 rounded-2xl bg-slate-900/60 backdrop-blur-sm border border-white/5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center gap-2 flex-wrap">
+                                <span class="text-[10px] font-bold text-yellow-400 uppercase tracking-widest bg-yellow-400/10 px-3 py-1 rounded-full border border-yellow-400/20">Now Playing</span>
+                                <span class="w-1 h-1 bg-slate-600 rounded-full"></span>
+                                <span class="text-[10px] text-slate-400 font-mono" id="playerLessonIndex">Lesson 1</span>
+                            </div>
+                            <h2 id="vidTitle" class="text-xl md:text-2xl font-black mt-2 text-white tracking-tight">Course Title</h2>
+                        </div>
+                        <div class="flex items-center gap-2 self-end sm:self-center">
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider bg-white/5 px-3 py-1.5 rounded-full border border-white/5">
+                                <svg class="w-3 h-3 inline mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                HD
+                            </span>
+                        </div>
+                    </div>
+                    <p id="vidDesc" class="text-slate-400 mt-4 leading-relaxed max-w-3xl text-sm md:text-base px-1"></p>
                 </div>
 
+                <!-- Right: lesson list -->
                 <div class="lg:col-span-4">
-                    <div class="glass-card rounded-3xl p-6 h-fit max-h-[600px] flex flex-col">
+                    <div class="glass-card rounded-3xl p-5 h-fit max-h-[620px] flex flex-col">
                         <div class="flex items-center justify-between mb-4 pb-4 border-b border-white/10">
                             <h3 class="text-xs font-black uppercase tracking-[0.2em] text-slate-300 flex items-center gap-2">
-                                <span class="w-2 h-2 bg-yellow-400 rounded-full animate-ping"></span> Course
+                                <span class="w-2 h-2 bg-yellow-400 rounded-full animate-ping"></span> Course Content
                             </h3>
-                            <span class="text-[10px] text-slate-500 font-mono" id="lessonCountBadge">0 Lessons</span>
+                            <span class="text-[10px] text-slate-500 font-mono bg-white/5 px-2 py-1 rounded-full" id="lessonCountBadge">0 Lessons</span>
                         </div>
-                        <div id="lessonList" class="overflow-y-auto space-y-2.5 pr-1"></div>
+                        <div id="lessonList" class="overflow-y-auto space-y-2 pr-1"></div>
                     </div>
                 </div>
             </div>
         </div>
     </main>
 
-    <!-- ============================================= -->
-    <!-- ANDROID APP DOWNLOAD POPUP MODAL (Punch-hole Phone) -->
-    <!-- ============================================= -->
+    <!-- App Download Popup (same as before) -->
     <div id="appPopup" class="fixed inset-0 z-[110] hidden items-center justify-center p-4 sm:p-6 backdrop-blur-2xl bg-black/85" onclick="if(event.target === this) closeAppPopup()">
         <div class="relative w-full max-w-3xl max-h-[92vh] overflow-y-auto animate-pop">
-            <!-- Glow background -->
             <div class="absolute -top-20 -right-20 w-64 h-64 bg-yellow-400/20 rounded-full blur-3xl pointer-events-none"></div>
             <div class="absolute -bottom-20 -left-20 w-64 h-64 bg-emerald-400/10 rounded-full blur-3xl pointer-events-none"></div>
-
             <div class="relative glass-card rounded-[2rem] border border-white/10 shadow-2xl overflow-hidden">
-                <!-- Header gradient strip -->
                 <div class="h-1.5 w-full bg-gradient-to-r from-yellow-400 via-amber-400 to-emerald-400"></div>
-
-                <!-- Close button -->
                 <button onclick="closeAppPopup()" class="absolute top-5 right-5 z-20 text-slate-400 hover:text-white transition w-9 h-9 rounded-full flex items-center justify-center bg-white/5 hover:bg-white/10 border border-white/10">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                 </button>
-
                 <div class="p-7 sm:p-10">
-                    <!-- Layout -->
                     <div class="grid grid-cols-1 md:grid-cols-5 gap-8 items-center">
-                        
-                        <!-- LEFT: Punch-hole Phone Mockup -->
                         <div class="md:col-span-2 flex justify-center">
                             <div class="relative float-phone">
-                                <!-- Phone Frame -->
                                 <div class="w-44 h-80 rounded-[2.5rem] bg-slate-950 border-[3px] border-slate-700 p-2 shadow-2xl pulse-glow relative">
-                                    <!-- Punch-hole Camera -->
                                     <div class="absolute top-4 left-1/2 -translate-x-1/2 w-4 h-4 bg-black rounded-full border-2 border-slate-800 shadow-[inset_0_1px_3px_rgba(0,0,0,1)] z-20"></div>
-                                    
-                                    <!-- Screen Content -->
                                     <div class="w-full h-full rounded-[2rem] bg-[#0a0f1c] overflow-hidden flex flex-col items-center justify-center relative pt-6">
-                                        
-                                        <!-- App Icon (Glowing) -->
                                         <div class="relative mb-3">
                                             <div class="absolute inset-0 bg-blue-500 blur-xl opacity-40 rounded-2xl"></div>
-                                            <img src="https://raw.githubusercontent.com/itsayushacharya/Learnwithayush/refs/heads/main/images/icon.png"
-                                                 alt="App icon"
-                                                 class="relative w-16 h-16 rounded-2xl object-contain shadow-lg">
+                                            <img src="https://raw.githubusercontent.com/itsayushacharya/Learnwithayush/refs/heads/main/images/icon.png" alt="App icon" class="relative w-16 h-16 rounded-2xl object-contain shadow-lg">
                                         </div>
-                                        
-                                        <!-- Text -->
                                         <h4 class="text-white font-black text-sm tracking-tight">Learn with Ayush</h4>
                                         <p class="text-yellow-400 text-[9px] font-black uppercase tracking-widest mt-0.5">Android App</p>
-                                        
-                                        <!-- Fake Progress Bar -->
                                         <div class="w-24 h-1.5 bg-slate-800 rounded-full mt-5 overflow-hidden">
                                             <div class="h-full w-[65%] bg-yellow-400 rounded-full"></div>
                                         </div>
                                     </div>
                                 </div>
-
-                                <!-- Floating Badge: Offline -->
                                 <div class="absolute -right-6 top-12 bg-slate-900 border border-white/10 rounded-xl px-3 py-2 shadow-xl flex items-center gap-1.5">
                                     <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
                                     <span class="text-[10px] font-bold text-white">Offline</span>
                                 </div>
-                                
-                                <!-- Floating Badge: Rating -->
                                 <div class="absolute -left-5 bottom-16 bg-slate-900 border border-white/10 rounded-xl px-3 py-2 shadow-xl flex items-center gap-1.5">
                                     <svg class="w-3 h-3 text-yellow-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/></svg>
                                     <span class="text-[10px] font-bold text-white">4.9 ★</span>
                                 </div>
                             </div>
                         </div>
-
-                        <!-- RIGHT: Content -->
                         <div class="md:col-span-3 text-center md:text-left">
                             <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-widest mb-3">
-                                <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span>
-                                Now Available
+                                <span class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></span> Now Available
                             </span>
-                            <h2 class="text-2xl sm:text-3xl font-black text-white leading-tight mb-2">
-                                Get the <span class="hero-gradient-text">Learn with Ayush</span> Android App
-                            </h2>
-                            <p class="text-slate-400 text-xs sm:text-sm leading-relaxed mb-5">
-                                Learn anywhere, anytime. Download the official app for a faster, smoother, and fully mobile-optimized experience.
-                            </p>
-
-                            <!-- Features -->
+                            <h2 class="text-2xl sm:text-3xl font-black text-white leading-tight mb-2">Get the <span class="hero-gradient-text">Learn with Ayush</span> Android App</h2>
+                            <p class="text-slate-400 text-xs sm:text-sm leading-relaxed mb-5">Learn anywhere, anytime. Download the official app for a faster, smoother, and fully mobile-optimized experience.</p>
                             <div class="grid grid-cols-2 gap-2.5 mb-6">
                                 <div class="flex items-center gap-2 p-2.5 rounded-xl bg-white/5 border border-white/5">
                                     <svg class="w-4 h-4 text-yellow-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z"/></svg>
@@ -545,23 +933,15 @@
                                     <span class="text-[11px] font-bold text-slate-200">Instant Alerts</span>
                                 </div>
                             </div>
-
-                            <!-- Download CTA -> UPDATED WITH YOUR GITHUB APK LINK -->
-                            <a href="https://github.com/itsayushacharya/Learnwithayush/raw/refs/heads/main/app/learn%20with%20ayush.apk" 
-                               class="group relative w-full flex items-center justify-center gap-3 bg-gradient-to-r from-yellow-400 via-yellow-400 to-amber-500 text-slate-950 font-black py-4 px-6 rounded-2xl text-sm uppercase tracking-wider hover:shadow-[0_0_35px_rgba(251,191,36,0.5)] transition-all duration-300 hover:-translate-y-0.5 overflow-hidden">
+                            <a href="https://github.com/itsayushacharya/Learnwithayush/raw/refs/heads/main/app/learn%20with%20ayush.apk" class="group relative w-full flex items-center justify-center gap-3 bg-gradient-to-r from-yellow-400 via-yellow-400 to-amber-500 text-slate-950 font-black py-4 px-6 rounded-2xl text-sm uppercase tracking-wider hover:shadow-[0_0_35px_rgba(251,191,36,0.5)] transition-all duration-300 hover:-translate-y-0.5 overflow-hidden">
                                 <span class="absolute inset-0 -translate-x-full group-hover:translate-x-full transition-transform duration-700 bg-gradient-to-r from-transparent via-white/40 to-transparent"></span>
-                                <svg class="w-6 h-6 relative z-10" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993s-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993s-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.2439 13.8533 7.8508 12 7.8508s-3.5902.3931-5.1367 1.0989L4.841 5.4467a.4161.4161 0 00-.5677-.1521.4157.4157 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3435-4.1021-2.6892-7.5743-6.1185-9.4396"/>
-                                </svg>
+                                <svg class="w-6 h-6 relative z-10" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993s-.4482.9997-.9993.9997m-11.046 0c-.5511 0-.9993-.4486-.9993-.9997s.4482-.9993.9993-.9993c.5511 0 .9993.4482.9993.9993s-.4482.9997-.9993.9997m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.2439 13.8533 7.8508 12 7.8508s-3.5902.3931-5.1367 1.0989L4.841 5.4467a.4161.4161 0 00-.5677-.1521.4157.4157 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3435-4.1021-2.6892-7.5743-6.1185-9.4396"/></svg>
                                 <span class="relative z-10 flex flex-col items-start leading-none">
                                     <span class="text-[9px] font-bold tracking-widest opacity-70">DOWNLOAD NOW</span>
                                     <span class="text-sm font-black tracking-tight">Get Android APK</span>
                                 </span>
-                                <svg class="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                                </svg>
+                                <svg class="w-5 h-5 relative z-10 transition-transform duration-300 group-hover:translate-y-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                             </a>
-
                             <p class="text-center md:text-left text-[10px] text-slate-500 mt-3 flex items-center justify-center md:justify-start gap-1.5">
                                 <svg class="w-3 h-3 text-emerald-400" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                                 100% safe • No ads • Free download
@@ -573,24 +953,20 @@
         </div>
     </div>
 
-    <!-- Modal for Premium Course Auth -->
+    <!-- Auth Modal (same) -->
     <div id="authModal" class="fixed inset-0 z-[100] hidden items-center justify-center p-6 backdrop-blur-2xl bg-black/80">
         <div class="glass-card max-w-md w-full p-8 md:p-10 rounded-3xl text-center border-white/10 relative shadow-2xl">
             <button onclick="closeModal()" class="absolute top-5 right-5 text-slate-500 hover:text-white transition w-8 h-8 rounded-full flex items-center justify-center bg-white/5">✕</button>
-            
             <div class="w-16 h-16 bg-yellow-400/10 rounded-2xl flex items-center justify-center mx-auto mb-4 text-yellow-400 border border-yellow-400/20">
                 <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
             </div>
-            
             <h3 class="text-2xl font-black text-white mb-1">Unlock Masterclass</h3>
             <p class="text-slate-400 text-xs mb-6 leading-relaxed">Contact directly on WhatsApp to complete enrollment and obtain your access code instantly.</p>
-            
             <div class="space-y-4">
                 <a id="waBtn" target="_blank" href="#" class="flex items-center justify-center gap-2.5 w-full bg-[#25D366] text-slate-950 py-3.5 rounded-xl font-black text-xs hover:opacity-90 transition shadow-lg shadow-emerald-500/20 uppercase tracking-wider">
                     <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.316 1.592 5.448 0 9.886-4.438 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.818-.981z"/></svg>
                     Order Passcode via WhatsApp
                 </a>
-                
                 <div class="pt-5 border-t border-white/10">
                     <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2 text-left">Already have a passcode?</label>
                     <input id="authCode" type="text" placeholder="ENTER ACCESS CODE" class="w-full bg-slate-950 border border-white/10 rounded-xl py-3 text-center text-xl font-mono tracking-widest mb-3 focus:border-yellow-400 outline-none transition-all placeholder:text-slate-700 text-yellow-400">
@@ -601,381 +977,575 @@
         </div>
     </div>
 
-    <!-- Footer -->
     <footer class="border-t border-white/5 py-8 px-6 text-center text-slate-500 text-xs bg-slate-950/60">
         <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3">
-                <img src="https://raw.githubusercontent.com/itsayushacharya/Learnwithayush/refs/heads/main/images/icon.png"
-                     alt="Learn with Ayush logo"
-                     class="w-6 h-6 rounded-lg object-contain">
+                <img src="https://raw.githubusercontent.com/itsayushacharya/Learnwithayush/refs/heads/main/images/icon.png" alt="Learn with Ayush logo" class="w-6 h-6 rounded-lg object-contain">
                 <p>© Learn with Ayush. All rights reserved.</p>
             </div>
             <p>Designed & Engineered by <a href="https://ayushacharya.info.np/" target="_blank" class="text-slate-300 font-semibold hover:text-yellow-400 transition">Ayush Acharya</a></p>
         </div>
     </footer>
 
-    <!-- JavaScript Logic -->
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    <!-- JavaScript -->
+    <script>
+        // ============ DATA ============
         const aiThumbnail = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'><rect width='800' height='450' fill='%230f172a'/><defs><linearGradient id='g1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%233b82f6' stop-opacity='0.2'/><stop offset='100%25' stop-color='%23fbbf24' stop-opacity='0.2'/></linearGradient></defs><rect width='800' height='450' fill='url(%23g1)'/><circle cx='400' cy='225' r='120' fill='none' stroke='%23fbbf24' stroke-width='2' stroke-dasharray='8 8' opacity='0.4'/><circle cx='400' cy='225' r='80' fill='none' stroke='%2360a5fa' stroke-width='1.5'/><text x='400' y='210' font-family='sans-serif' font-weight='900' font-size='38' fill='%23ffffff' text-anchor='middle'>AI PROMPT</text><text x='400' y='255' font-family='sans-serif' font-weight='800' font-size='26' fill='%23fbbf24' text-anchor='middle'>ENGINEERING MASTERCLASS</text><rect x='310' y='285' width='180' height='30' rx='15' fill='%231e293b' stroke='%23fbbf24' stroke-width='1'/><text x='400' y='305' font-family='sans-serif' font-weight='700' font-size='12' fill='%23f8fafc' text-anchor='middle'>TECHNICAL TUTORIAL</text></svg>";
-
         const webThumbnail = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'><rect width='800' height='450' fill='%23090d16'/><defs><linearGradient id='g2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%2310b981' stop-opacity='0.25'/><stop offset='100%25' stop-color='%233b82f6' stop-opacity='0.2'/></linearGradient></defs><rect width='800' height='450' fill='url(%23g2)'/><rect x='150' y='100' width='500' height='250' rx='16' fill='%230f172a' stroke='%23334155' stroke-width='2'/><path d='M180 140 H 620' stroke='%23334155' stroke-width='2'/><circle cx='175' cy='120' r='5' fill='%23ef4444'/><circle cx='192' cy='120' r='5' fill='%23f59e0b'/><circle cx='209' cy='120' r='5' fill='%2310b981'/><text x='400' y='210' font-family='sans-serif' font-weight='900' font-size='36' fill='%23ffffff' text-anchor='middle'>WEBSITE DEVELOPMENT</text><text x='400' y='250' font-family='sans-serif' font-weight='700' font-size='20' fill='%2338bdf8' text-anchor='middle'>HTML5 • CSS3 • JAVASCRIPT</text></svg>";
-        
         const freeaiThumbnail = "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='800' height='450' viewBox='0 0 800 450'><rect width='800' height='450' fill='%23090d16'/><defs><linearGradient id='g2' x1='0%25' y1='0%25' x2='100%25' y2='100%25'><stop offset='0%25' stop-color='%2310b981' stop-opacity='0.25'/><stop offset='100%25' stop-color='%233b82f6' stop-opacity='0.2'/></linearGradient></defs><rect width='800' height='450' fill='url(%23g2)'/><rect x='150' y='100' width='500' height='250' rx='16' fill='%230f172a' stroke='%23334155' stroke-width='2'/><path d='M180 140 H 620' stroke='%23334155' stroke-width='2'/><circle cx='175' cy='120' r='5' fill='%23ef4444'/><circle cx='192' cy='120' r='5' fill='%23f59e0b'/><circle cx='209' cy='120' r='5' fill='%2310b981'/><text x='400' y='210' font-family='sans-serif' font-weight='900' font-size='36' fill='%23ffffff' text-anchor='middle'>Create And Publish</text><text x='400' y='250' font-family='sans-serif' font-weight='700' font-size='20' fill='%2338bdf8' text-anchor='middle'> Using Al Website</text></svg>";
 
         const freeCourses = [
-            {
-                id: "free-1",
-                category: "ai",
-                title: "Create And Publish Website Using Al",
-                badge: "Free",
-                thumbnail: freeaiThumbnail,
-                duration: "15:07 Minutes",
-                level: "Basic",
-                desc: "Learn to communicate effectively with Artificial Intelligence and create websites",
-                lessons: [
-                    { title: "Create And Publish Website Using Al", videoId: "https://ia601405.us.archive.org/35/items/create-and-publish-website-using-al-in-nepali-ayush-acharya-1080p/Create-and-Publish-Website-Using-Al-In-Nepali-Ayush-Acharya_1080p.mp4" }
-                ]
-            }
+            { id: "free-1", category: "ai", title: "Create And Publish Website Using Al", badge: "Free", thumbnail: freeaiThumbnail, duration: "15:07 Minutes", level: "Basic", desc: "Learn to communicate effectively with Artificial Intelligence and create websites", lessons: [ { title: "Create And Publish Website Using Al", videoId: "https://ia601405.us.archive.org/35/items/create-and-publish-website-using-al-in-nepali-ayush-acharya-1080p/Create-and-Publish-Website-Using-Al-In-Nepali-Ayush-Acharya_1080p.mp4" } ] }
         ];
-
         const paidCourses = [
-            {
-                id: "paid-1",
-                category: "ai",
-                title: "AI Prompt Engineering",
-                badge: "BESTSELLER",
-                thumbnail: aiThumbnail,
-                duration: "2.5 Hours",
-                level: "All Levels",
-                desc: "Learn to communicate effectively with Artificial Intelligence models, automate workflows, and construct advanced prompts.",
-                price: 1000,
-                passcodes: [
-                    "0506", 
-                    { start: 2002, end: 2058 }
-                ],
-                lessons: [
-                    { title: "01. Overview to AI", videoId: "https://ia601401.us.archive.org/25/items/overview-to-ai/Overview%20to%20AI.mp4" },
-                    { title: "02. Overview to AI Prompt Engineering", videoId: "https://ia601008.us.archive.org/9/items/ai-prompt-engineering-overview/AI%20PROMPT%20ENGINEERING%20OVERVIEW.mp4" }
-                ]
-            }, 
-            {
-                id: "paid-2",
-                category: "web",
-                title: "Website Development Masterclass",
-                badge: "POPULAR",
-                thumbnail: webThumbnail,
-                duration: "6.0 Hours",
-                level: "Beginner to Pro",
-                desc: "Master HTML, CSS, Flexbox, Grid, and JavaScript to build fully responsive and modern dynamic websites from scratch.",
-                price: 1500,
-                passcodes: [
-                    { start: 2059, end: 2089 }
-                ],
-                lessons: [
-                    { title: "01. Course Roadmap", videoId: "https://ia800905.us.archive.org/15/items/website-development-course-roadmap/Website%20Development%20Course%20Roadmap.mp4" },
-                    { title: "02. Introduction to Working of Web, Tools & HTML", videoId: "https://ia600109.us.archive.org/34/items/introduction-to-working-of-web-tools-html/Introduction%20to%20Working%20of%20Web%2C%20Tools%20%26%20HTML.mp4" }
-                ]
-            }
+            { id: "paid-1", category: "ai", title: "AI Prompt Engineering", badge: "BESTSELLER", thumbnail: aiThumbnail, duration: "2.5 Hours", level: "All Levels", desc: "Learn to communicate effectively with Artificial Intelligence models, automate workflows, and construct advanced prompts.", price: 1000, passcodes: ["0506", { start: 2002, end: 2058 }], lessons: [ { title: "01. Overview to AI", videoId: "https://ia601401.us.archive.org/25/items/overview-to-ai/Overview%20to%20AI.mp4" }, { title: "02. Overview to AI Prompt Engineering", videoId: "https://ia601008.us.archive.org/9/items/ai-prompt-engineering-overview/AI%20PROMPT%20ENGINEERING%20OVERVIEW.mp4" } ] },
+            { id: "paid-2", category: "web", title: "Website Development Masterclass", badge: "POPULAR", thumbnail: webThumbnail, duration: "6.0 Hours", level: "Beginner to Pro", desc: "Master HTML, CSS, Flexbox, Grid, and JavaScript to build fully responsive and modern dynamic websites from scratch.", price: 1500, passcodes: [{ start: 2059, end: 2089 }], lessons: [ { title: "01. Course Roadmap", videoId: "https://ia800905.us.archive.org/15/items/website-development-course-roadmap/Website%20Development%20Course%20Roadmap.mp4" }, { title: "02. Introduction to Working of Web, Tools & HTML", videoId: "https://ia600109.us.archive.org/34/items/introduction-to-working-of-web-tools-html/Introduction%20to%20Working%20of%20Web%2C%20Tools%20%26%20HTML.mp4" } ] }
         ];
-
-        const allCourses = [
-            ...freeCourses.map(c => ({ ...c, type: 'free' })),
-            ...paidCourses.map(c => ({ ...c, type: 'paid' }))
-        ];
+        const allCourses = [ ...freeCourses.map(c => ({ ...c, type: 'free' })), ...paidCourses.map(c => ({ ...c, type: 'paid' })) ];
 
         let activeCourse = null;
         let currentCategoryFilter = 'all';
         let currentCarouselIndex = 0;
         let visibleCarouselItems = 0;
 
-        // ===== APP POPUP LOGIC =====
-        function openAppPopup() {
-            const popup = document.getElementById('appPopup');
-            popup.classList.remove('hidden');
-            popup.classList.add('flex');
-            document.body.style.overflow = 'hidden';
-        }
+        // ============ APP POPUP ============
+        function openAppPopup() { const p = document.getElementById('appPopup'); p.classList.remove('hidden'); p.classList.add('flex'); document.body.style.overflow = 'hidden'; }
+        function closeAppPopup() { const p = document.getElementById('appPopup'); p.classList.add('hidden'); p.classList.remove('flex'); document.body.style.overflow = ''; }
 
-        function closeAppPopup() {
-            const popup = document.getElementById('appPopup');
-            popup.classList.add('hidden');
-            popup.classList.remove('flex');
-            document.body.style.overflow = '';
-        }
-
-        // Close popups with Escape key
-        document.addEventListener('keydown', function(e) {
-            if (e.key === 'Escape') {
-                closeAppPopup();
-                closeModal();
-            }
-        });
-
-        // ===== CAROUSEL =====
+        // ============ CAROUSEL ============
         function renderCarousel() {
             const track = document.getElementById('carouselTrack');
             const badge = document.getElementById('courseCountBadge');
-            
             track.innerHTML = "";
-
             const filtered = allCourses.filter(c => {
                 if (currentCategoryFilter === 'all') return true;
                 if (currentCategoryFilter === 'free') return c.type === 'free';
                 if (currentCategoryFilter === 'paid') return c.type === 'paid';
                 return c.category === currentCategoryFilter;
             });
-
             badge.innerText = `Showing ${filtered.length} course${filtered.length === 1 ? '' : 's'}`;
-
             if (filtered.length === 0) {
-                track.innerHTML = `
-                    <div class="w-full py-16 text-center text-slate-500">
-                        <svg class="w-12 h-12 mx-auto mb-3 opacity-30" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
-                        <p class="text-sm font-semibold">No courses found in this category.</p>
-                    </div>`;
+                track.innerHTML = `<div class="w-full py-16 text-center text-slate-500"><p class="text-sm font-semibold">No courses found in this category.</p></div>`;
                 return;
             }
-
             filtered.forEach(c => {
                 const isFree = c.type === 'free';
                 const card = document.createElement('div');
                 card.className = "course-card rounded-3xl overflow-hidden flex flex-col justify-between";
-                
-                let priceHtml = '';
-                if (isFree) {
-                    priceHtml = `<div class="flex items-center gap-2"><span class="text-2xl font-black text-emerald-400">FREE</span><span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Instant Access</span></div>`;
-                } else {
-                    priceHtml = `<div class="flex items-baseline gap-2"><span class="price-tag">Rs. ${c.price}</span><small class="text-slate-400 font-medium">one-time</small></div>`;
-                }
-
+                let priceHtml = isFree
+                    ? `<div class="flex items-center gap-2"><span class="text-2xl font-black text-emerald-400">FREE</span><span class="text-[10px] text-slate-500 font-bold uppercase tracking-wider">Instant Access</span></div>`
+                    : `<div class="flex items-baseline gap-2"><span class="price-tag">Rs. ${c.price}</span><small class="text-slate-400 font-medium">one-time</small></div>`;
                 const badgeLabel = isFree ? 'FREE' : (c.badge || 'PREMIUM');
                 const badgeClass = isFree ? 'bg-emerald-500 text-slate-950' : 'bg-yellow-400 text-slate-950';
-
                 const actionBtn = isFree
                     ? `<button onclick="playFree('${c.id}')" class="w-full bg-white/5 border border-white/10 py-3 rounded-xl text-xs font-bold uppercase tracking-widest text-white hover:bg-white/10 transition">Start Free Watch</button>`
-                    : `<button onclick="initAuth('${c.id}')" class="w-full bg-yellow-400 text-slate-950 py-3 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-yellow-300 transition shadow-lg shadow-yellow-400/20 flex items-center justify-between px-4">
-                        <span>Enroll Now</span>
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                       </button>`;
-
+                    : `<button onclick="initAuth('${c.id}')" class="w-full bg-yellow-400 text-slate-950 py-3 rounded-xl text-xs font-black uppercase tracking-wider hover:bg-yellow-300 transition shadow-lg shadow-yellow-400/20 flex items-center justify-between px-4"><span>Enroll Now</span><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg></button>`;
                 card.innerHTML = `
                     <div>
                         <div class="relative overflow-hidden aspect-video bg-slate-900">
                             <img src="${c.thumbnail}" alt="${c.title}" class="thumb-img w-full h-full object-cover transition-transform duration-500">
-                            <div class="absolute top-3 left-3 ${badgeClass} font-black text-[9px] px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg">
-                                ${badgeLabel}
-                            </div>
-                            <div class="absolute bottom-3 right-3 bg-slate-950/80 backdrop-blur-md text-slate-300 font-mono text-[10px] px-2.5 py-1 rounded-full border border-white/10">
-                                ${c.duration}
-                            </div>
+                            <div class="absolute top-3 left-3 ${badgeClass} font-black text-[9px] px-2.5 py-1 rounded-full uppercase tracking-wider shadow-lg">${badgeLabel}</div>
+                            <div class="absolute bottom-3 right-3 bg-slate-950/80 backdrop-blur-md text-slate-300 font-mono text-[10px] px-2.5 py-1 rounded-full border border-white/10">${c.duration}</div>
                         </div>
                         <div class="p-5 pb-3">
                             <h3 class="text-base font-extrabold text-white mb-1.5 leading-snug line-clamp-2">${c.title}</h3>
                             <p class="text-slate-400 text-[11px] leading-relaxed line-clamp-2 mb-3">${c.desc}</p>
-                            <div class="flex items-center justify-between pt-3 border-t border-white/5">
-                                ${priceHtml}
-                                <span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">${c.level || ''}</span>
-                            </div>
+                            <div class="flex items-center justify-between pt-3 border-t border-white/5">${priceHtml}<span class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">${c.level || ''}</span></div>
                         </div>
                     </div>
-                    <div class="p-5 pt-0">
-                        ${actionBtn}
-                    </div>
-                `;
+                    <div class="p-5 pt-0">${actionBtn}</div>`;
                 track.appendChild(card);
             });
-
             currentCarouselIndex = 0;
             updateCarousel();
         }
-
         function updateCarousel() {
             if (window.matchMedia('(max-width: 640px)').matches) return;
-            
             const track = document.getElementById('carouselTrack');
             const cards = track.children;
             if (cards.length === 0) return;
-            
             const containerWidth = track.parentElement.clientWidth;
             const cardWidth = cards[0].offsetWidth + 24;
             visibleCarouselItems = Math.max(1, Math.floor(containerWidth / cardWidth));
-            
             const maxIndex = Math.max(0, cards.length - visibleCarouselItems);
             if (currentCarouselIndex > maxIndex) currentCarouselIndex = maxIndex;
-            
-            const offset = -currentCarouselIndex * cardWidth;
-            track.style.transform = `translateX(${offset}px)`;
+            track.style.transform = `translateX(${-currentCarouselIndex * cardWidth}px)`;
         }
-
-        function scrollCarousel(direction) {
+        function scrollCarousel(dir) {
             if (window.matchMedia('(max-width: 640px)').matches) return;
-            
             const track = document.getElementById('carouselTrack');
             const cards = track.children;
             if (cards.length === 0) return;
-            
             const containerWidth = track.parentElement.clientWidth;
             const cardWidth = cards[0].offsetWidth + 24;
             const visibleCount = Math.max(1, Math.floor(containerWidth / cardWidth));
             const maxIndex = Math.max(0, cards.length - visibleCount);
-            
-            currentCarouselIndex = Math.min(maxIndex, Math.max(0, currentCarouselIndex + direction));
+            currentCarouselIndex = Math.min(maxIndex, Math.max(0, currentCarouselIndex + dir));
             updateCarousel();
         }
-
-        function filterCategory(cat) {
+        function filterCategory(cat, evt) {
             currentCategoryFilter = cat;
-            document.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
+            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+            if (evt && evt.target) evt.target.classList.add('active');
             renderCarousel();
         }
-
-        function showSection(sectionId) {
-            ['dashboard', 'about', 'contact', 'player'].forEach(id => {
-                const el = document.getElementById(id);
-                if (id === sectionId) {
-                    el.classList.remove('hidden');
-                } else {
-                    el.classList.add('hidden');
+        function showSection(id) {
+            ['dashboard','about','contact','player'].forEach(s => {
+                const el = document.getElementById(s);
+                if (s === id) el.classList.remove('hidden'); else el.classList.add('hidden');
+            });
+            ['courses','about','contact'].forEach(tab => {
+                const b = document.getElementById(`nav-${tab}`);
+                if (b) {
+                    if (tab === id || (id === 'dashboard' && tab === 'courses')) b.classList.add('text-white','bg-white/10');
+                    else b.classList.remove('text-white','bg-white/10');
                 }
             });
-
-            ['courses', 'about', 'contact'].forEach(tab => {
-                const navBtn = document.getElementById(`nav-${tab}`);
-                if (navBtn) {
-                    if (tab === sectionId || (sectionId === 'dashboard' && tab === 'courses')) {
-                        navBtn.classList.add('text-white', 'bg-white/10');
-                    } else {
-                        navBtn.classList.remove('text-white', 'bg-white/10');
-                    }
-                }
-            });
-
-            if (sectionId !== 'player') {
-                const wrapper = document.getElementById('mediaWrapper');
-                if (wrapper) wrapper.innerHTML = '';
+            if (id !== 'player') {
+                const media = document.getElementById('vpMedia');
+                if (media) media.innerHTML = '';
             }
-
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
-
         function playFree(id) {
-            const course = freeCourses.find(c => c.id === id);
-            if (course && course.lessons && course.lessons.length > 0) {
-                startPlayer(course.title, course.lessons, course.desc);
-            }
+            const c = freeCourses.find(x => x.id === id);
+            if (c && c.lessons && c.lessons.length) startPlayer(c.title, c.lessons, c.desc);
         }
-
         function initAuth(id) {
             activeCourse = paidCourses.find(c => c.id === id);
-            const phoneNumber = "9779804363914"; 
             const msg = encodeURIComponent(`Hi Ayush, I want to purchase the "${activeCourse.title}" course for Rs. ${activeCourse.price}. My name is: `);
-            document.getElementById('waBtn').href = `https://wa.me/${phoneNumber}?text=${msg}`;
+            document.getElementById('waBtn').href = `https://wa.me/9779804363914?text=${msg}`;
             document.getElementById('authModal').classList.remove('hidden');
             document.getElementById('authModal').classList.add('flex');
             document.getElementById('authError').classList.add('hidden');
             document.getElementById('authCode').value = '';
-            
-            setTimeout(() => {
-                document.getElementById('authCode').focus();
-            }, 100);
+            setTimeout(() => document.getElementById('authCode').focus(), 100);
         }
-
         function unlockCourse() {
             const val = document.getElementById('authCode').value.trim();
             const numVal = parseInt(val, 10);
-
-            if (!activeCourse || !activeCourse.passcodes) {
-                document.getElementById('authError').classList.remove('hidden');
-                return;
-            }
-
-            const isValid = activeCourse.passcodes.some(item => {
-                if (typeof item === 'string') {
-                    return item === val;
-                } else if (typeof item === 'object' && item.start !== undefined && item.end !== undefined) {
-                    return !isNaN(numVal) && numVal >= item.start && numVal <= item.end;
-                }
+            if (!activeCourse || !activeCourse.passcodes) { document.getElementById('authError').classList.remove('hidden'); return; }
+            const ok = activeCourse.passcodes.some(item => {
+                if (typeof item === 'string') return item === val;
+                if (item && item.start !== undefined && item.end !== undefined) return !isNaN(numVal) && numVal >= item.start && numVal <= item.end;
                 return false;
             });
+            if (ok) { closeModal(); startPlayer(activeCourse.title, activeCourse.lessons, activeCourse.desc); }
+            else document.getElementById('authError').classList.remove('hidden');
+        }
+        function closeModal() {
+            document.getElementById('authModal').classList.add('hidden');
+            document.getElementById('authModal').classList.remove('flex');
+        }
+        document.getElementById('authCode').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); unlockCourse(); } });
 
-            if (isValid) {
-                closeModal();
-                startPlayer(activeCourse.title, activeCourse.lessons, activeCourse.desc);
-            } else {
-                document.getElementById('authError').classList.remove('hidden');
+        // ============ NEW CUSTOM VIDEO PLAYER ============
+        const vp = {
+            shell: null, media: null, video: null, iframe: null,
+            playBtn: null, playIcon: null, pauseIcon: null,
+            bigPlay: null, bigPlayBtn: null,
+            curTime: null, durTime: null,
+            progress: null, played: null, buffer: null, thumb: null, tooltip: null,
+            muteBtn: null, volOn: null, volOff: null, volSlider: null, volFill: null,
+            speedBtn: null, speedMenu: null, speedLabel: null,
+            pipBtn: null, fullBtn: null, fullIcon: null, exitFullIcon: null,
+            spinner: null, errorOverlay: null, controls: null, lessonTag: null, topTitle: null,
+            hideTimer: null, isSeeking: false, speed: 1
+        };
+
+        function initPlayerUI() {
+            vp.shell = document.getElementById('vpShell');
+            vp.media = document.getElementById('vpMedia');
+            vp.playBtn = document.getElementById('vpPlayBtn');
+            vp.playIcon = document.getElementById('vpPlayIcon');
+            vp.pauseIcon = document.getElementById('vpPauseIcon');
+            vp.bigPlay = document.getElementById('vpBigPlay');
+            vp.bigPlayBtn = document.getElementById('vpBigPlayBtn');
+            vp.curTime = document.getElementById('vpCurTime');
+            vp.durTime = document.getElementById('vpDurTime');
+            vp.progress = document.getElementById('vpProgress');
+            vp.played = document.getElementById('vpPlayed');
+            vp.buffer = document.getElementById('vpBuffer');
+            vp.thumb = document.getElementById('vpThumb');
+            vp.tooltip = document.getElementById('vpTooltip');
+            vp.muteBtn = document.getElementById('vpMuteBtn');
+            vp.volOn = document.getElementById('vpVolOnIcon');
+            vp.volOff = document.getElementById('vpVolOffIcon');
+            vp.volSlider = document.getElementById('vpVolSlider');
+            vp.volFill = document.getElementById('vpVolFill');
+            vp.speedBtn = document.getElementById('vpSpeedBtn');
+            vp.speedMenu = document.getElementById('vpSpeedMenu');
+            vp.speedLabel = document.getElementById('vpSpeedLabel');
+            vp.pipBtn = document.getElementById('vpPipBtn');
+            vp.fullBtn = document.getElementById('vpFullBtn');
+            vp.fullIcon = document.getElementById('vpFullIcon');
+            vp.exitFullIcon = document.getElementById('vpExitFullIcon');
+            vp.spinner = document.getElementById('vpSpinner');
+            vp.errorOverlay = document.getElementById('vpErrorOverlay');
+            vp.controls = document.getElementById('vpControls');
+            vp.lessonTag = document.getElementById('vpLessonTag');
+            vp.topTitle = document.getElementById('vpTopTitle');
+
+            // Play / Pause
+            vp.playBtn.addEventListener('click', togglePlay);
+            vp.bigPlayBtn.addEventListener('click', togglePlay);
+            // Clicking the video also toggles play
+            vp.media.addEventListener('click', (e) => {
+                if (e.target.tagName === 'IFRAME') return;
+                togglePlay();
+            });
+
+            // Rewind / forward
+            document.getElementById('vpRewindBtn').addEventListener('click', () => { if (vp.video) vp.video.currentTime = Math.max(0, vp.video.currentTime - 10); });
+            document.getElementById('vpForwardBtn').addEventListener('click', () => { if (vp.video) vp.video.currentTime = Math.min(vp.video.duration || 0, vp.video.currentTime + 10); });
+
+            // Progress interactions
+            vp.progress.addEventListener('mousedown', startSeek);
+            vp.progress.addEventListener('touchstart', startSeek, { passive: false });
+            window.addEventListener('mousemove', onSeekMove);
+            window.addEventListener('touchmove', onSeekMove, { passive: false });
+            window.addEventListener('mouseup', endSeek);
+            window.addEventListener('touchend', endSeek);
+            vp.progress.addEventListener('mousemove', updateTooltip);
+            vp.progress.addEventListener('mouseleave', () => { if (!vp.isSeeking) vp.tooltip.style.opacity = 0; });
+
+            // Volume
+            vp.muteBtn.addEventListener('click', toggleMute);
+            vp.volSlider.addEventListener('mousedown', startVolume);
+            vp.volSlider.addEventListener('touchstart', startVolume, { passive: false });
+            window.addEventListener('mousemove', onVolumeMove);
+            window.addEventListener('touchmove', onVolumeMove, { passive: false });
+            window.addEventListener('mouseup', endVolume);
+            window.addEventListener('touchend', endVolume);
+
+            // Speed
+            vp.speedBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                vp.speedMenu.classList.toggle('show');
+            });
+            vp.speedMenu.querySelectorAll('button').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const sp = parseFloat(btn.dataset.speed);
+                    setSpeed(sp);
+                    vp.speedMenu.classList.remove('show');
+                });
+            });
+            document.addEventListener('click', (e) => {
+                if (!vp.speedMenu.contains(e.target) && e.target !== vp.speedBtn && !vp.speedBtn.contains(e.target)) {
+                    vp.speedMenu.classList.remove('show');
+                }
+            });
+
+            // PiP
+            vp.pipBtn.addEventListener('click', async () => {
+                if (!vp.video) return;
+                try {
+                    if (document.pictureInPictureElement) await document.exitPictureInPicture();
+                    else await vp.video.requestPictureInPicture();
+                } catch (err) { console.warn('PiP error', err); }
+            });
+
+            // Fullscreen
+            vp.fullBtn.addEventListener('click', toggleFullscreen);
+            document.addEventListener('fullscreenchange', () => {
+                const isFs = document.fullscreenElement === vp.shell;
+                vp.fullIcon.style.display = isFs ? 'none' : '';
+                vp.exitFullIcon.style.display = isFs ? '' : 'none';
+            });
+
+            // Show / hide controls on hover
+            vp.shell.addEventListener('mousemove', showControls);
+            vp.shell.addEventListener('mouseenter', showControls);
+            vp.shell.addEventListener('mouseleave', () => {
+                if (!vp.shell.classList.contains('is-paused')) hideControlsSoon();
+            });
+
+            // Keyboard
+            document.addEventListener('keydown', (e) => {
+                if (document.getElementById('player').classList.contains('hidden')) return;
+                if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+                if (!vp.video) return;
+                switch (e.key) {
+                    case ' ': case 'k': e.preventDefault(); togglePlay(); break;
+                    case 'ArrowLeft': e.preventDefault(); vp.video.currentTime = Math.max(0, vp.video.currentTime - 5); break;
+                    case 'ArrowRight': e.preventDefault(); vp.video.currentTime = Math.min(vp.video.duration || 0, vp.video.currentTime + 5); break;
+                    case 'ArrowUp': e.preventDefault(); vp.video.volume = Math.min(1, vp.video.volume + 0.1); updateVolumeUI(); break;
+                    case 'ArrowDown': e.preventDefault(); vp.video.volume = Math.max(0, vp.video.volume - 0.1); updateVolumeUI(); break;
+                    case 'm': toggleMute(); break;
+                    case 'f': toggleFullscreen(); break;
+                }
+            });
+        }
+
+        function showControls() {
+            vp.shell.classList.add('is-controls-visible');
+            if (vp.hideTimer) clearTimeout(vp.hideTimer);
+            if (!vp.shell.classList.contains('is-paused')) {
+                vp.hideTimer = setTimeout(() => {
+                    vp.shell.classList.remove('is-controls-visible');
+                }, 2600);
+            }
+        }
+        function hideControlsSoon() {
+            if (vp.hideTimer) clearTimeout(vp.hideTimer);
+            vp.hideTimer = setTimeout(() => {
+                vp.shell.classList.remove('is-controls-visible');
+            }, 1500);
+        }
+
+        function togglePlay() {
+            if (!vp.video) return;
+            if (vp.video.paused) vp.video.play().catch(()=>{});
+            else vp.video.pause();
+        }
+
+        function formatTime(sec) {
+            if (!isFinite(sec)) return '0:00';
+            sec = Math.floor(sec);
+            const h = Math.floor(sec / 3600);
+            const m = Math.floor((sec % 3600) / 60);
+            const s = sec % 60;
+            if (h > 0) return `${h}:${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+            return `${m}:${String(s).padStart(2,'0')}`;
+        }
+
+        // ===== SEEK =====
+        function startSeek(e) {
+            if (!vp.video) return;
+            vp.isSeeking = true;
+            vp.progress.classList.add('is-scrubbing');
+            e.preventDefault();
+            seekTo(e);
+        }
+        function onSeekMove(e) {
+            if (!vp.isSeeking || !vp.video) return;
+            e.preventDefault();
+            seekTo(e);
+        }
+        function seekTo(e) {
+            const rect = vp.progress.getBoundingClientRect();
+            const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+            const pct = Math.max(0, Math.min(1, x / rect.width));
+            if (vp.video.duration) {
+                vp.video.currentTime = pct * vp.video.duration;
+                updateProgressUI();
+                updateTooltip(e);
+            }
+        }
+        function endSeek() {
+            if (!vp.isSeeking) return;
+            vp.isSeeking = false;
+            vp.progress.classList.remove('is-scrubbing');
+            vp.tooltip.style.opacity = 0;
+        }
+        function updateTooltip(e) {
+            if (!vp.video || !vp.video.duration) return;
+            const rect = vp.progress.getBoundingClientRect();
+            const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+            const pct = Math.max(0, Math.min(1, x / rect.width));
+            vp.tooltip.textContent = formatTime(pct * vp.video.duration);
+            vp.tooltip.style.left = pct * 100 + '%';
+            vp.tooltip.style.opacity = 1;
+        }
+
+        function updateProgressUI() {
+            if (!vp.video) return;
+            const d = vp.video.duration || 0;
+            const c = vp.video.currentTime || 0;
+            const pct = d ? (c / d) * 100 : 0;
+            vp.played.style.width = pct + '%';
+            vp.thumb.style.left = pct + '%';
+            vp.curTime.textContent = formatTime(c);
+            vp.durTime.textContent = formatTime(d);
+            // buffer
+            if (vp.video.buffered.length) {
+                let end = 0;
+                for (let i = 0; i < vp.video.buffered.length; i++) {
+                    if (vp.video.buffered.start(i) <= c) end = Math.max(end, vp.video.buffered.end(i));
+                }
+                vp.buffer.style.width = (d ? (end / d) * 100 : 0) + '%';
             }
         }
 
+        // ===== VOLUME =====
+        let volDragging = false;
+        function startVolume(e) { volDragging = true; e.preventDefault(); setVolumeFromEvent(e); }
+        function onVolumeMove(e) { if (volDragging) { e.preventDefault(); setVolumeFromEvent(e); } }
+        function endVolume() { volDragging = false; }
+        function setVolumeFromEvent(e) {
+            if (!vp.video) return;
+            const rect = vp.volSlider.getBoundingClientRect();
+            const x = (e.touches ? e.touches[0].clientX : e.clientX) - rect.left;
+            const pct = Math.max(0, Math.min(1, x / rect.width));
+            vp.video.volume = pct;
+            vp.video.muted = pct === 0;
+            updateVolumeUI();
+        }
+        function toggleMute() {
+            if (!vp.video) return;
+            vp.video.muted = !vp.video.muted;
+            if (vp.video.muted && vp.video.volume > 0 && vp.video.volume < 0.01) vp.video.volume = 0.5;
+            updateVolumeUI();
+        }
+        function updateVolumeUI() {
+            if (!vp.video) return;
+            const muted = vp.video.muted || vp.video.volume === 0;
+            vp.volOn.style.display = muted ? 'none' : '';
+            vp.volOff.style.display = muted ? '' : 'none';
+            vp.volFill.style.width = (vp.video.muted ? 0 : vp.video.volume) * 100 + '%';
+        }
+
+        // ===== SPEED =====
+        function setSpeed(sp) {
+            if (!vp.video) return;
+            vp.speed = sp;
+            vp.video.playbackRate = sp;
+            vp.speedLabel.textContent = sp + '×';
+            vp.speedMenu.querySelectorAll('button').forEach(b => {
+                b.classList.toggle('active', parseFloat(b.dataset.speed) === sp);
+            });
+        }
+
+        // ===== FULLSCREEN =====
+        function toggleFullscreen() {
+            if (document.fullscreenElement) document.exitFullscreen();
+            else if (vp.shell.requestFullscreen) vp.shell.requestFullscreen();
+        }
+
+        // ===== ATTACH MEDIA =====
+        function attachVideo(src) {
+            vp.media.innerHTML = '';
+            vp.errorOverlay.classList.remove('show');
+            const v = document.createElement('video');
+            v.className = 'vp-video';
+            v.src = src;
+            v.playsInline = true;
+            v.preload = 'auto';
+            v.autoplay = true;
+            // REMOVED: v.setAttribute('crossorigin', 'anonymous'); -> This was causing the CORS block
+            vp.media.appendChild(v);
+            vp.video = v;
+            vp.iframe = null;
+
+            // Reset UI
+            vp.played.style.width = '0%';
+            vp.thumb.style.left = '0%';
+            vp.curTime.textContent = '0:00';
+            vp.durTime.textContent = '0:00';
+            vp.buffer.style.width = '0%';
+            vp.speedLabel.textContent = '1×';
+            vp.speed = 1;
+            vp.speedMenu.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.speed === '1'));
+            vp.volFill.style.width = '100%';
+            vp.volOn.style.display = '';
+            vp.volOff.style.display = 'none';
+
+            // Events
+            v.addEventListener('play', () => {
+                vp.playIcon.style.display = 'none';
+                vp.pauseIcon.style.display = '';
+                vp.bigPlay.classList.remove('show');
+                vp.shell.classList.remove('is-paused');
+                showControls();
+                hideControlsSoon();
+            });
+            v.addEventListener('pause', () => {
+                vp.playIcon.style.display = '';
+                vp.pauseIcon.style.display = 'none';
+                vp.bigPlay.classList.add('show');
+                vp.shell.classList.add('is-paused');
+                vp.shell.classList.add('is-controls-visible');
+            });
+            v.addEventListener('waiting', () => vp.spinner.classList.add('show'));
+            v.addEventListener('canplay', () => { vp.spinner.classList.remove('show'); vp.errorOverlay.classList.remove('show'); });
+            v.addEventListener('playing', () => { vp.spinner.classList.remove('show'); vp.errorOverlay.classList.remove('show'); });
+            v.addEventListener('timeupdate', updateProgressUI);
+            v.addEventListener('progress', updateProgressUI);
+            v.addEventListener('durationchange', updateProgressUI);
+            v.addEventListener('loadedmetadata', () => {
+                updateProgressUI();
+                vp.spinner.classList.remove('show');
+            });
+            v.addEventListener('error', () => {
+                vp.spinner.classList.remove('show');
+                vp.errorOverlay.classList.add('show');
+            });
+            v.addEventListener('click', togglePlay);
+            v.addEventListener('volumechange', updateVolumeUI);
+
+            // Play immediately (browser may block; user can click big play)
+            v.play().catch(() => {
+                vp.bigPlay.classList.add('show');
+                vp.shell.classList.add('is-paused');
+                vp.shell.classList.add('is-controls-visible');
+                vp.spinner.classList.remove('show'); // Stop spinner if autoplay is blocked
+            });
+        }
+
+        function attachIframe(src) {
+            vp.media.innerHTML = '';
+            vp.errorOverlay.classList.remove('show');
+            const f = document.createElement('iframe');
+            f.src = src;
+            f.allow = 'autoplay; fullscreen; encrypted-media; picture-in-picture';
+            f.allowFullscreen = true;
+            vp.media.appendChild(f);
+            vp.video = null;
+            vp.iframe = f;
+            // Hide custom controls for iframes (YouTube etc. have their own)
+            vp.controls.style.display = 'none';
+            vp.bigPlay.classList.remove('show');
+            vp.spinner.classList.remove('show');
+        }
+
+        // ===== PUBLIC ENTRYPOINTS =====
         function startPlayer(title, lessons, desc) {
             showSection('player');
             document.getElementById('vidTitle').innerText = title;
             document.getElementById('vidDesc').innerText = desc;
             document.getElementById('lessonCountBadge').innerText = `${lessons.length} Lesson Modules`;
-            
-            const list = document.getElementById('lessonList');
-            list.innerHTML = "";
+            document.getElementById('vpTopTitle').textContent = title;
 
+            const list = document.getElementById('lessonList');
+            list.innerHTML = '';
             lessons.forEach((l, i) => {
                 const b = document.createElement('button');
-                b.className = "lesson-btn w-full text-left p-3.5 rounded-xl text-xs transition bg-white/5 hover:bg-white/10 border border-white/5 flex items-center justify-between font-medium text-slate-300";
+                b.className = 'lesson-btn w-full text-left p-3.5 rounded-xl text-xs transition bg-white/5 hover:bg-white/10 border border-white/5 flex items-center justify-between font-medium text-slate-300';
                 b.innerHTML = `<span class="line-clamp-1 pr-2">${l.title}</span> <span class="text-slate-500 font-mono text-[10px] shrink-0">0${i+1}</span>`;
-                b.onclick = (e) => {
-                    document.querySelectorAll('.lesson-btn').forEach(btn => btn.classList.remove('active-lesson'));
+                b.onclick = () => {
+                    document.querySelectorAll('.lesson-btn').forEach(x => x.classList.remove('active-lesson'));
                     b.classList.add('active-lesson');
-                    switchVideo(l.videoId);
+                    loadLesson(l, i);
                 };
                 list.appendChild(b);
             });
-
-            if (list.firstChild) {
-                list.firstChild.classList.add('active-lesson');
-            }
-
-            switchVideo(lessons[0].videoId);
+            if (list.firstChild) list.firstChild.classList.add('active-lesson');
+            loadLesson(lessons[0], 0);
         }
 
-        function switchVideo(id) {
-            const wrapper = document.getElementById('mediaWrapper');
-            if (id.includes('player.cloudinary.com')) {
-                wrapper.innerHTML = `<iframe id="vidFrame" src="${id}" frameborder="0" allow="autoplay; fullscreen; encrypted-media" allowfullscreen class="w-full h-full"></iframe>`;
-            } else if (id.startsWith('http')) {
-                wrapper.innerHTML = `<video src="${id}" controls autoplay class="rounded-2xl h-full w-full object-cover"></video>`;
+        function loadLesson(lesson, idx) {
+            document.getElementById('playerLessonIndex').textContent = `Lesson ${idx + 1}`;
+            document.getElementById('vpLessonTag').textContent = `Lesson ${idx + 1}`;
+            vp.shell.classList.add('is-controls-visible');
+            vp.controls.style.display = '';
+            if (lesson.videoId.includes('player.cloudinary.com') || lesson.videoId.includes('youtube.com') || lesson.videoId.includes('youtu.be')) {
+                attachIframe(lesson.videoId);
+            } else if (lesson.videoId.startsWith('http')) {
+                attachVideo(lesson.videoId);
             } else {
-                wrapper.innerHTML = `<iframe id="vidFrame" src="https://www.youtube.com/embed/${id}?autoplay=1&rel=0" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>`;
+                attachIframe(`https://www.youtube.com/embed/${lesson.videoId}?autoplay=1&rel=0`);
             }
         }
 
-        function closeModal() {
-            document.getElementById('authModal').classList.add('hidden');
-            document.getElementById('authModal').classList.remove('flex');
-        }
-
-        // ===== INITIALIZATION =====
+        // ===== INIT =====
         window.addEventListener('load', () => {
             renderCarousel();
             updateCarousel();
-
-            // Auto-open app popup IMMEDIATELY on every page load, and auto-close it exactly 2 seconds later
-            openAppPopup(); 
-            
-            // Close exactly 2000ms (2 seconds) later
-            setTimeout(() => {
-                closeAppPopup();
-            }, 2000); 
+            initPlayerUI();
+            openAppPopup();
+            setTimeout(closeAppPopup, 2000);
         });
-
-        window.addEventListener('resize', () => {
-            updateCarousel();
-        });
-
-        document.getElementById('authCode').addEventListener('keydown', function(event) {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                unlockCourse();
-            }
-        });
+        window.addEventListener('resize', updateCarousel);
     </script>
-<script type="module" src="https://static.cloudflareinsights.com/beacon.min.js/vce701823e78c4301a35b7e07294d87301792088814092" integrity="sha512-UKNk8GbxkABxKcXYuLkO16EleLGUkcvJWtpSNmExE0Too3ZaFAxTscNWEc1OdAv5/BikHawapSCaiD2XCmp+Bw==" data-cf-beacon='{"version":"2024.11.0","token":"87327fcf53be41f08c37151b64e8f4d9","r":1,"spa":2}' crossorigin="anonymous"></script>
 </body>
 </html>
